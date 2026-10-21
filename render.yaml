@@ -1,0 +1,21 @@
+# Render Blueprint for Fana Karaoke.
+#
+# Rooms and the WebSocket hub live in process memory, so the service must run
+# as a single instance (Render's default). The free plan sleeps after 15 minutes
+# without traffic, which ends every room: use a paid plan for real events.
+services:
+  - type: web
+    name: fana-karaoke
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /healthz
+    autoDeployTrigger: commit
+    envVars:
+      # Kept stable across deploys so host/device cookies stay valid.
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: TRUST_PROXY
+        value: "true"

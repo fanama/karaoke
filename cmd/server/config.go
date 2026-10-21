@@ -32,7 +32,7 @@ func loadSettings(log *slog.Logger) settings {
 		LogLevel:   logLevel(),
 		Dev:        envBool("DEV", false),
 		Port:       env("PORT", "8080"),
-		BaseURL:    strings.TrimRight(env("PUBLIC_BASE_URL", ""), "/"),
+		BaseURL:    baseURL(),
 		Secret:     loadSecret(log),
 		Instances:  splitList(env("INVIDIOUS_INSTANCES", defaultInstances)),
 		Region:     env("YOUTUBE_REGION", "FR"),
@@ -50,6 +50,16 @@ func loadSettings(log *slog.Logger) settings {
 }
 
 const defaultInstances = "https://invidious.f5.si,https://yewtu.be,https://inv.nadeko.net,https://invidious.nerdvpn.de,https://iv.melmac.space"
+
+// baseURL prefers the explicit public URL, then Render's injected one. It must
+// be absolute so absolute links, QR codes, secure cookies and origin checks work.
+func baseURL() string {
+	raw := env("PUBLIC_BASE_URL", "")
+	if raw == "" {
+		raw = env("RENDER_EXTERNAL_URL", "")
+	}
+	return strings.TrimRight(raw, "/")
+}
 
 func loadSecret(log *slog.Logger) []byte {
 	secret := []byte(env("SESSION_SECRET", ""))

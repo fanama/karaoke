@@ -60,7 +60,7 @@ Vite proxies `/api` and `/ws` to port 8080. `DEV=true` disables rate limits and 
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `PORT` | `8080` | HTTP listen port. |
-| `PUBLIC_BASE_URL` | derived from request | Absolute origin for QR codes, join/TV links, and secure cookies. Set it in production, e.g. `https://karaoke.example`. |
+| `PUBLIC_BASE_URL` | derived from request; on Render, `RENDER_EXTERNAL_URL` | Absolute origin for QR codes, join/TV links, secure cookies, and origin checks. Set it in production, e.g. `https://karaoke.example`. |
 | `INVIDIOUS_INSTANCES` | `https://invidious.f5.si,https://yewtu.be,https://inv.nadeko.net,https://invidious.nerdvpn.de,https://iv.melmac.space` | Comma-separated Invidious base URLs, tried in order. Unhealthy instances are skipped for 60 s. |
 | `YOUTUBE_REGION` | `FR` | Region passed to Invidious search. |
 | `SESSION_SECRET` | random at boot | HMAC key for device/host cookies. Set and keep stable in production. |
@@ -94,6 +94,25 @@ docker run --rm -p 8080:8080 \
 ```
 
 The image is a multi-stage build: Node builds the Svelte assets, Go produces a static binary, and the runtime image is Alpine with CA certificates. No volume is needed because there is no persistent state.
+
+## Deploy on Render
+
+The repository ships a [`render.yaml`](render.yaml) Blueprint:
+
+1. Push the repository to GitHub and open **New → Blueprint** in the Render dashboard.
+2. Select the repo; Render detects `render.yaml` and creates the `fana-karaoke` web service.
+3. Apply. The first build takes a few minutes; the health check is `/healthz`.
+
+The Blueprint builds the existing Dockerfile, keeps `TRUST_PROXY=true` (Render's proxy overwrites `X-Forwarded-For`), and generates a stable `SESSION_SECRET`. `PUBLIC_BASE_URL` falls back to Render's `RENDER_EXTERNAL_URL`, so QR codes, absolute links, Secure cookies and WebSocket origin checks work without extra configuration.
+
+To deploy manually instead: **New → Web Service**, runtime **Docker**, health check path `/healthz`, and the same two environment variables.
+
+**Constraints**
+
+- Run **exactly one instance**. Room state and the WebSocket hub are process-local; scaling out breaks rooms and live updates.
+- The free plan spins down after 15 minutes without traffic, which ends all rooms and adds a cold-start delay. Use a paid instance for an event.
+- With a custom domain, set `PUBLIC_BASE_URL` explicitly (for example `https://karaoke.example`) so links and cookies use that origin.
+- Deploys restart the process: rooms are lost and clients reconnect automatically.
 
 ## Public deployment notes
 
