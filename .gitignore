@@ -1,0 +1,6 @@
+node_modules/
+fana-karaoke
+*.log
+.DS_Store
+web/test-results/
+web/playwright-report/

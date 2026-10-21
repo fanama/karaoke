@@ -1,0 +1,7 @@
+.git
+node_modules
+web/node_modules
+fana-karaoke
+*.log
+web/test-results
+web/playwright-report
