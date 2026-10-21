@@ -125,17 +125,42 @@ The image is a multi-stage build: Node builds the Svelte assets, Go produces a s
 
 ## Architecture
 
+Hexagonal architecture (ports & adapters) with a functional domain core. Dependencies point inward: the domain knows nothing about HTTP, storage, or Svelte; use cases only know the domain and the port interfaces.
+
 ```text
-cmd/server                 composition root / config / graceful shutdown
-internal/domain            entities, views, error codes
-internal/app               room manager: queue, votes, playback, cleanup
-internal/search            Invidious client, cache, oEmbed fallback
-internal/video             safe YouTube URL parser
-internal/httpapi           routes, cookies, host auth, WS hub, QR
-web/                       Svelte 5 app, embedded assets, Playwright e2e
+cmd/server/                       composition root: main.go, config.go, wire.go
+internal/domain/                  pure core: entities + rules (room, queue, playback,
+                                  voting, video, notice, snapshot/views, errors)
+internal/ports/                   input.go (KaraokeService facade), output.go (repositories,
+                                  event publisher, catalog, clock, IDs, signer, QR, limiter)
+internal/usecase/                 room, queue, playback, vote and lifecycle services
+                                  behind a single Facade
+internal/adapters/primary/httpapi transport: routes, handlers, middleware, session cookies,
+                                  SPA, WebSocket hub and handler
+internal/adapters/secondary/      memory (room/device repos, rate limiter), invidious
+                                  (client, parser, oEmbed prober, cache), crypto (IDs, HMAC
+                                  signer), qrgen, clock, bus
+internal/architecture/            automated layer and size checks
 ```
 
-The room manager is independent of HTTP and Svelte. The HTTP adapter owns cookies, rate limits, and the WebSocket hub. Mutations go through HTTP; WebSockets carry full snapshots plus TV playback telemetry.
+```text
+web/src/domain/                   pure TypeScript: models, playback math, room code,
+                                  autoplay policy
+web/src/ports/                    contracts: API, socket, player, browser, DI context
+web/src/application/              controllers and stores (welcome, guest, tv, i18n);
+                                  no direct fetch, WebSocket or window.YT
+web/src/adapters/                 fetch API, WebSocket, YouTube IFrame player, browser APIs
+web/src/ui/                       Svelte components: common, welcome, guest, tv
+web/src/styles/                   tokens, base, components
+```
+
+**Backend.** `internal/domain` is a set of pure functions over copied room state: no I/O, no mutexes, no transport types. `internal/usecase` orchestrates them through the driven ports (rooms, devices, clock, IDs, catalog, event publisher) in a `usecase.Deps` bundle. `internal/adapters/primary/httpapi` implements the driving side: it depends on the `ports.KaraokeService` interface, owns cookies, origin/CSRF checks, rate limits, QR responses and the WebSocket hub. `internal/adapters/secondary/*` provide the concrete driven adapters. `cmd/server/wire.go` is the only production code that constructs concrete types and wires them together; the event `bus` is connected to the hub there instead of via post-construction setters.
+
+**Frontend.** `main.ts` builds the production adapters once and `App.svelte` exposes them through a Svelte context (`web/src/ports/context.ts`). Views ask `getAppContext()` for their dependencies and instantiate an application controller; UI components never import `adapters`, and the controllers never touch `fetch`, `WebSocket` or `window.YT` directly.
+
+**Data flow.** Mutations go through HTTP; the use case persists the new room state and publishes room-updated / room-ended events on the bus, which the hub turns into full `snapshot` messages (and a final `roomEnded` before closing) over WebSockets. The TV sends playback telemetry (`tvEnded`, `tvError`, `tvProgress`) back over the same socket.
+
+Layer isolation and the 300-line file / 40-line function limits are enforced by `go test ./internal/architecture/...`. The full rationale and dependency matrix are in [`ddd-architecture-spec.md`](ddd-architecture-spec.md).
 
 ## Verify
 

@@ -1,10 +1,15 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import Welcome from './views/Welcome.svelte';
-  import GuestRoom from './views/GuestRoom.svelte';
-  import TvRoom from './views/TvRoom.svelte';
-  import LanguageToggle from './lib/components/LanguageToggle.svelte';
-  import { tr } from './lib/i18n';
+  import { tr } from './application/i18n';
+  import { setAppContext, type AppDependencies } from './ports/context';
+  import LanguageToggle from './ui/common/LanguageToggle.svelte';
+  import GuestRoomView from './ui/guest/GuestRoomView.svelte';
+  import TvRoomView from './ui/tv/TvRoomView.svelte';
+  import WelcomeView from './ui/welcome/WelcomeView.svelte';
+
+  export let deps: AppDependencies;
+
+  setAppContext(deps);
 
   let path = location.pathname.replace(/\/+$/, '') || '/';
 
@@ -22,14 +27,14 @@
 </script>
 
 {#if path === '/'}
-  <Welcome />
+  <WelcomeView />
 {:else if guest}
-  <GuestRoom code={decodeURIComponent(guest[1]).toLowerCase()} />
+  <GuestRoomView code={decodeURIComponent(guest[1]).toLowerCase()} />
 {:else if tv}
-  <TvRoom token={tv[1]} />
+  <TvRoomView token={tv[1]} />
 {:else}
-  <main class="not-found">
-    <div class="card">
+  <main class="center-page">
+    <div class="card end-card">
       <p class="badge">404</p>
       <h1>{$tr('notFound.title')}</h1>
       <p class="muted">{$tr('notFound.body')}</p>
@@ -38,27 +43,3 @@
     <div style="margin-top: 1rem;"><LanguageToggle /></div>
   </main>
 {/if}
-
-<style>
-  .not-found {
-    min-height: 100dvh;
-    display: grid;
-    place-content: center;
-    justify-items: center;
-    padding: 2rem;
-    text-align: center;
-  }
-  .card {
-    padding: 2rem;
-    display: grid;
-    gap: 0.75rem;
-    justify-items: center;
-    max-width: 420px;
-  }
-  .card h1 {
-    font-size: 1.8rem;
-  }
-  .card .btn {
-    margin-top: 0.5rem;
-  }
-</style>
