@@ -24,9 +24,9 @@ func TestLibraryExportImport(t *testing.T) {
 	if status, raw := callJSON(t, host, http.MethodGet, base+"/library", nil, &stats); status != http.StatusOK || stats.Songs != 1 {
 		t.Fatalf("library stats: %d %s", status, raw)
 	}
-	archive := downloadLibrary(t, host, base+"/library/export")
+	archive := downloadLibrary(t, host, base+"/library/export?format=sql")
 	if !bytes.HasPrefix(archive, []byte("SQLite format 3\x00")) {
-		t.Fatalf("export is not a SQLite file: %q", archive[:16])
+		t.Fatalf("host export must stay SQLite: %q", archive[:16])
 	}
 	imported := importLibrary(t, host, base+"/library/import", archive)
 	if imported.Imported != 1 || imported.Songs != 1 {

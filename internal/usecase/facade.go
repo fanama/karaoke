@@ -57,7 +57,7 @@ func (s *CatalogService) Search(ctx context.Context, query string) ([]domain.Sea
 	if results == nil {
 		results = []domain.SearchResult{}
 	}
-	s.remember(ctx, results)
+	s.cacheResults(ctx, results)
 	return results, stale, nil
 }
 
@@ -72,9 +72,9 @@ func (s *CatalogService) localSearch(ctx context.Context, query string) []domain
 	return results
 }
 
-func (s *CatalogService) remember(ctx context.Context, results []domain.SearchResult) {
+func (s *CatalogService) cacheResults(ctx context.Context, results []domain.SearchResult) {
 	if s.Library == nil || len(results) == 0 {
 		return
 	}
-	_ = s.Library.Save(ctx, results)
+	_ = s.Library.Cache(ctx, results)
 }

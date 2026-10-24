@@ -35,5 +35,8 @@ export interface RoomApiPort {
   adminSession(): Promise<AdminSession>;
   adminLogin(token: string): Promise<AdminSession>;
   adminLogout(): Promise<void>;
-  adminImport(file: File): Promise<{ imported: number; songs: number }>;
+  adminImport(
+    file: File,
+    format: 'sqlite' | 'sql'
+  ): Promise<{ imported: number; songs: number }>;
 }

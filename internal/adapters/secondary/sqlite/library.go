@@ -13,15 +13,13 @@ import (
 	"time"
 
 	"fana-karaoke/internal/domain"
+	"fana-karaoke/internal/ports"
 
 	_ "modernc.org/sqlite"
 )
 
-const (
-	// MaxResults caps how many library matches a search returns.
-	MaxResults = 20
-	maxTokens  = 6
-)
+// MaxResults caps how many library matches a search returns.
+const MaxResults = 20
 
 var schema = []string{
 	`CREATE TABLE IF NOT EXISTS songs (
@@ -111,9 +109,18 @@ func (l *Library) Count(ctx context.Context) (int, error) {
 	return total, err
 }
 
+// Status reports the local backend state for the admin page.
+func (l *Library) Status(ctx context.Context) ports.LibraryStatus {
+	status := ports.LibraryStatus{Backend: "sqlite", Connected: l.db.PingContext(ctx) == nil}
+	if total, err := l.Count(ctx); err == nil {
+		status.Songs = total
+	}
+	return status
+}
+
 // Search returns songs whose title or channel contains every query word.
 func (l *Library) Search(ctx context.Context, query string, limit int) ([]domain.SearchResult, error) {
-	tokens := searchTokens(query)
+	tokens := domain.SearchTokens(query)
 	if len(tokens) == 0 {
 		return nil, nil
 	}
@@ -155,8 +162,21 @@ func searchStatement(tokens []string, limit int) (string, []any) {
 
 // Save inserts songs and refreshes known ones without creating duplicates.
 func (l *Library) Save(ctx context.Context, songs []domain.SearchResult) error {
-	valid := validSongs(songs)
-	if len(valid) == 0 {
+	now := time.Now().UTC()
+	stored := make([]domain.LibrarySong, 0, len(songs))
+	for _, song := range validSongs(songs) {
+		stored = append(stored, domain.NewLibrarySong(song, "", now))
+	}
+	return l.saveSongs(ctx, stored)
+}
+
+// Cache is the best-effort counterpart of Save; local disk writes are fast.
+func (l *Library) Cache(ctx context.Context, songs []domain.SearchResult) error {
+	return l.Save(ctx, songs)
+}
+
+func (l *Library) saveSongs(ctx context.Context, songs []domain.LibrarySong) error {
+	if len(songs) == 0 {
 		return nil
 	}
 	tx, err := l.db.BeginTx(ctx, nil)
@@ -169,16 +189,31 @@ func (l *Library) Save(ctx context.Context, songs []domain.SearchResult) error {
 		return err
 	}
 	defer stmt.Close()
-	stamp := time.Now().UTC().Format(time.RFC3339)
-	for _, song := range valid {
-		text := searchText(song.Title, song.Channel)
-		_, err := stmt.ExecContext(ctx, song.VideoID, song.Title, song.Channel,
-			song.ThumbnailURL, song.DurationSeconds, text, stamp, stamp)
-		if err != nil {
+	for _, song := range songs {
+		if err := insertSong(ctx, stmt, song); err != nil {
 			return err
 		}
 	}
 	return tx.Commit()
+}
+
+func insertSong(ctx context.Context, stmt *sql.Stmt, song domain.LibrarySong) error {
+	first := stamp(song.FirstSeenAt)
+	last := stamp(song.LastSeenAt)
+	text := song.SearchText
+	if text == "" {
+		text = domain.SearchText(song.Title, song.Channel)
+	}
+	_, err := stmt.ExecContext(ctx, song.VideoID, song.Title, song.Channel,
+		song.ThumbnailURL, song.DurationSeconds, text, first, last)
+	return err
+}
+
+func stamp(t time.Time) string {
+	if t.IsZero() {
+		return time.Now().UTC().Format(time.RFC3339)
+	}
+	return t.UTC().Format(time.RFC3339)
 }
 
 func validSongs(songs []domain.SearchResult) []domain.SearchResult {

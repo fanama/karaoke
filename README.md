@@ -1,6 +1,6 @@
 # Fana Karaoke
 
-A browser karaoke room. Put the room on the TV, let guests scan a QR code, search YouTube for karaoke videos, upvote the queue, and vote to skip. No accounts, no installs. A small SQLite library remembers songs so repeat searches skip YouTube.
+A browser karaoke room. Put the room on the TV, let guests scan a QR code, search YouTube for karaoke videos, upvote the queue, and vote to skip. No accounts, no installs. A durable song library remembers songs so repeat searches skip YouTube: local SQLite in development, Cloudflare D1 in production.
 
 - **TV view** (`/tv/<secret>`) — the YouTube player, join QR, host PIN, queue drawer, and host controls.
 - **Guest view** (`/r/<code>`) — phone-first search, paste-a-link, queue, upvotes, skip votes, and host controls after entering the PIN.
@@ -16,8 +16,8 @@ Created by [Fanamperantsoa Rakotoasimbola](https://github.com/fanama).
 - Svelte 5 + TypeScript + Vite, built into `web/dist` and embedded with `go:embed`.
 - YouTube IFrame Player API for playback; no media is downloaded or proxied.
 - Public [Invidious](https://invidious.io/) instances for search and metadata, with a 24-hour cache, stale results, and YouTube oEmbed fallback.
-- A local SQLite song library (pure-Go [`modernc.org/sqlite`](https://pkg.go.dev/modernc.org/sqlite), no CGO) searched before Invidious. It keeps one row per video, remembers online hits and played songs, and can be exported/imported by the host.
-- No frontend runtime server, no external font/CDN dependency at runtime. The song library is the only persistent file.
+- A song library searched before Invidious. It keeps one row per video, remembers online hits and played songs, and can be exported/imported. Development uses pure-Go [`modernc.org/sqlite`](https://pkg.go.dev/modernc.org/sqlite); production uses Cloudflare D1 through a small authenticated Worker.
+- No frontend runtime server, no external font/CDN dependency at runtime. Rooms are in memory; only the song library is durable.
 
 ## Run locally
 
@@ -73,7 +73,14 @@ Vite proxies `/api` and `/ws` to port 8080. `DEV=true` disables rate limits and 
 | `MAX_QUEUE` | `100` | Pending songs per room. |
 | `SEARCH_CACHE_TTL` | `24h` | Fresh search-cache lifetime. |
 | `SEARCH_STALE_TTL` | `168h` | Maximum age of a cached result served while Invidious is down. |
-| `LIBRARY_PATH` | `./data/library.sqlite` | SQLite song library file. Created on boot; an empty value disables the library. Point it at a persistent volume in production. |
+| `LIBRARY_BACKEND` | `file` | `file` (local SQLite), `d1` (Worker + Cloudflare D1), or `none`. |
+| `LIBRARY_PATH` | `./data/library.sqlite` | SQLite file used only when `LIBRARY_BACKEND=file`. An empty value disables that backend. |
+| `LIBRARY_PROXY_URL` | unset | Worker base URL, e.g. `https://fana-library.<subdomain>.workers.dev`. Required for `d1`. |
+| `LIBRARY_PROXY_TOKEN` | unset | Shared secret with the Worker. Not a Cloudflare API token. |
+| `LIBRARY_WARMUP_TIMEOUT` | `10s` | Maximum boot wait for the full D1 cache load. On timeout the app starts cache-only. |
+| `LIBRARY_READ_TIMEOUT` | `10s` | D1 pagination and health timeout. |
+| `LIBRARY_WRITE_TIMEOUT` | `5s` | Synchronous user-song write timeout. |
+| `LIBRARY_CACHE_WRITE_TIMEOUT` | `5s` | Best-effort search-result write timeout. |
 | `ADMIN_TOKEN` | unset | Enables the `/admin` page. Set a long random value, for example `openssl rand -hex 32`. Leave unset to disable the page. |
 | `LOG_LEVEL` | `info` | `debug`, `info`, `warn`, `error`. |
 | `TRUST_PROXY` | `false` | Use `X-Forwarded-For` for rate limits. Only enable behind a proxy that overwrites it. |
@@ -100,7 +107,7 @@ docker run --rm -p 8080:8080 -v fana-data:/data \
   fana-karaoke
 ```
 
-The image is a multi-stage build: Node builds the Svelte assets, Go produces a static binary, and the runtime image is Alpine with CA certificates. Rooms still have no persistent state, but the song library lives at `/data/library.sqlite` (`LIBRARY_PATH` is preset in the image); mount a volume to keep it across container replacements.
+The image is a multi-stage build: Node builds the Svelte assets, Go produces a static binary, and the runtime image is Alpine with CA certificates. Rooms still have no persistent state. By default the song library lives at `/data/library.sqlite` (`LIBRARY_PATH` is preset in the image); mount a volume to keep it across container replacements. Set `LIBRARY_BACKEND=d1` and the two Worker variables to use D1 instead.
 
 ## Deploy on Render
 
@@ -110,17 +117,34 @@ The repository ships a [`render.yaml`](render.yaml) Blueprint:
 2. Select the repo; Render detects `render.yaml` and creates the `fana-karaoke` web service.
 3. Apply. The first build takes a few minutes; the health check is `/healthz`.
 
-The Blueprint builds the existing Dockerfile, keeps `TRUST_PROXY=true` (Render's proxy overwrites `X-Forwarded-For`), and generates a stable `SESSION_SECRET`. `PUBLIC_BASE_URL` falls back to Render's `RENDER_EXTERNAL_URL`, so QR codes, absolute links, Secure cookies and WebSocket origin checks work without extra configuration.
+The Blueprint builds the existing Dockerfile, keeps `TRUST_PROXY=true` (Render's proxy overwrites `X-Forwarded-For`), and generates a stable `SESSION_SECRET`. `PUBLIC_BASE_URL` falls back to `RENDER_EXTERNAL_URL`, so QR codes, absolute links, Secure cookies and WebSocket origin checks work without extra configuration.
 
-To deploy manually instead: **New → Web Service**, runtime **Docker**, health check path `/healthz`, and the same two environment variables.
+**The library needs Cloudflare D1 on the free plan.** Render Free has no persistent disk, so a local SQLite file is erased on every redeploy, restart, or spin-down. Deploy the Worker once, then paste its URL and secret into Render:
+
+```bash
+cd workers/library
+npm install
+npx wrangler login
+npx wrangler d1 create fana-library --location=weur
+# copy the database id into wrangler.toml
+npx wrangler d1 migrations apply fana-library --remote
+openssl rand -hex 32
+npx wrangler secret put LIBRARY_PROXY_TOKEN
+npx wrangler deploy
+```
+
+Set `LIBRARY_BACKEND=d1`, `LIBRARY_PROXY_URL` and `LIBRARY_PROXY_TOKEN` in the Render dashboard. See [`workers/library/README.md`](workers/library/README.md) for the full runbook, local development, and optional CI deployment. No Cloudflare API token is stored in Render: the Worker holds the D1 binding, and Render only knows the Worker URL and a shared secret.
+
+To deploy manually instead: **New → Web Service**, runtime **Docker**, health check path `/healthz`, and the same environment variables.
 
 **Constraints**
 
 - Run **exactly one instance**. Room state and the WebSocket hub are process-local; scaling out breaks rooms and live updates.
 - The free plan spins down after 15 minutes without traffic, which ends all rooms and adds a cold-start delay. Use a paid instance for an event.
 - With a custom domain, set `PUBLIC_BASE_URL` explicitly (for example `https://karaoke.example`) so links and cookies use that origin.
-- Deploys restart the process: rooms are lost and clients reconnect automatically.
-- Attach a **Render disk** (paid plans) mounted at `/data` so the song library survives deploys. Without it the library still works but resets with the instance.
+- Deploys restart the process: rooms are lost and clients reconnect automatically. The D1 library survives.
+- D1 Free limits: 5 million rows read/day, 100,000 rows written/day, 500 MB per database. A 2,000-song library is well under 1 MB and uses about 2,000 reads per Render wake. Limits reset at 00:00 UTC; data is not lost when a limit is hit.
+- If D1 is unreachable or at its daily limit, the service starts cache-only: reads and online search still work, but new songs are rejected with `library_unavailable` until storage recovers.
 
 ## Public deployment notes
 
@@ -129,14 +153,14 @@ To deploy manually instead: **New → Web Service**, runtime **Docker**, health 
 - Run **one instance**. Room state and the WebSocket hub are process-local; horizontal scaling would need shared state and pub/sub.
 - Set `SESSION_SECRET`. If it changes, existing host/device cookies are invalidated (the rooms themselves are lost on restart anyway).
 - Set `TRUST_PROXY=true` only when the proxy overwrites `X-Forwarded-For`; otherwise rate limits can be spoofed.
-- Mount a persistent volume for `LIBRARY_PATH` (or leave it unset to disable the library).
-- `/healthz` is liveness-only and does not depend on Invidious or the library.
+- For the file backend, mount a persistent volume for `LIBRARY_PATH` (or leave it unset to disable the library). For the free Render deployment, use `LIBRARY_BACKEND=d1`; no disk is required.
+- `/healthz` is liveness-only and does not depend on Invidious or the library, so a D1 outage never puts Render into a restart loop.
 
 ## Search behavior
 
-- The local SQLite library is searched first, matching every query word against the title and channel (accent-insensitive). A hit returns instantly and never calls Invidious.
-- Online hits and added songs (including pasted links) are written to the library, deduplicated by YouTube id. Repeated queries therefore stop spending the upstream quota.
-- Hosts can **Export** the library as a `.sqlite` file and **Import** one back from **Manage**. Import merges: known videos are refreshed, never duplicated.
+- The library is searched first, matching every query word against the title and channel (accent-insensitive). With D1, search runs entirely against a warm in-memory cache loaded at boot; a hit returns instantly and never calls Invidious.
+- User-added songs (including pasted links) wait for the durable write before entering the queue. Online search hits are cached in memory immediately and written to D1 best-effort, so search never waits for the database.
+- Hosts can **Export** the library as a `.sqlite` file and **Import** one back from **Manage**. The admin page also offers a SQL dump. Import merges: known videos are refreshed, never duplicated.
 - Queries are normalized and ` karaoke` is appended unless the query already contains it.
 - Live streams, videos longer than 10 minutes, videos under 60 seconds, and videos whose owners disabled embedding are filtered out.
 - Results are cached for 24 hours and stale results can be served for up to a week with a banner.
@@ -155,7 +179,9 @@ LIBRARY_PATH=./data/library.sqlite \
 
 Or put `ADMIN_TOKEN=…` in a local `.env` file and restart the server; `.env` is loaded automatically. `.env` is ignored by Git.
 
-The page asks for the token once and keeps a signed, HttpOnly cookie for 24 hours. It shows the number of saved songs, downloads the SQLite file (**Download .sqlite**) and merges an uploaded file (**Upload .sqlite**) without creating duplicates. The same transfer is available to room hosts from the **Manage** panel.
+The page asks for the token once and keeps a signed, HttpOnly cookie for 24 hours. It shows the storage backend (Cloudflare D1, local SQLite, or disabled), connection and cache-only state, the song count, the last successful sync, and a sanitized storage error. It can download and upload both a `.sqlite` file and the app's SQL dump without creating duplicates. The room **Manage** panel keeps the `.sqlite`-only transfer.
+
+SQL import accepts only the dump format this app generates (it starts with `-- fana-karaoke-library v1`); arbitrary SQL is rejected. The admin import is sent as one atomic D1 batch and the cache is updated only after D1 confirms it.
 
 Without `ADMIN_TOKEN`, `/admin` explains that the page is disabled and the admin API answers `404`. The admin cookie is signed with `SESSION_SECRET`; rotating that secret logs admins out.
 
@@ -200,13 +226,21 @@ flowchart TB
     direction LR
     Memory["memory<br/>rooms · devices · rate limits"]
     Invidious["invidious<br/>search · metadata · cache"]
-    SQLLib["sqlite<br/>song library"]
+    CacheLib["d1<br/>warm cache + Worker client"]
+    SQLLib["sqlite<br/>local file backend"]
     Support["bus · crypto · qrgen · clock"]
+  end
+
+  subgraph Cloudflare["Cloudflare — Free"]
+    Worker["Worker<br/>fana-library"]
+    D1[("D1<br/>songs")]
   end
 
   FAdapters -->|"HTTP /api + WebSocket /ws"| HTTP
   OutPorts -. implemented by .-> Driven
   Invidious --> External["Invidious instances / YouTube oEmbed"]
+  CacheLib -->|"HTTPS + bearer secret"| Worker
+  Worker --> D1
   SQLLib --> File[("data/library.sqlite")]
 ```
 
@@ -221,8 +255,9 @@ internal/usecase/                 room, queue, playback, vote and lifecycle serv
 internal/adapters/primary/httpapi transport: routes, handlers, middleware, session cookies,
                                   SPA, WebSocket hub and handler
 internal/adapters/secondary/      memory (room/device repos, rate limiter), invidious
-                                  (client, parser, oEmbed prober, cache), sqlite (song
-                                  library), crypto (IDs, HMAC signer), qrgen, clock, bus
+                                  (client, parser, oEmbed prober, cache), d1 (warm
+                                  D1 library), sqlite (local file library),
+                                  crypto (IDs, HMAC signer), qrgen, clock, bus
 internal/architecture/            automated layer and size checks
 ```
 
@@ -252,6 +287,7 @@ go test ./... -race
 go vet ./...
 gofmt -l .
 cd web && npm run check && npm run build
+cd ../workers/library && npm test && npm run check
 ```
 
 Browser flows (requires Chrome installed and the server running on port 8090):
@@ -273,6 +309,7 @@ The scripts exercise create/join, QR, paste-add, host unlock, live queue updates
 ## Limitations
 
 - Rooms and host sessions are lost on restart. This is intentional. Only the song library persists.
+- The D1-backed library depends on Cloudflare's free tier and the Worker. If D1 is unavailable or at its daily limit, reads continue from cache but new songs are rejected until it recovers. There is no retry queue for best-effort search-result writes.
 - The library stores song metadata (id, title, channel, thumbnail, duration), not audio or video.
 - The public Invidious dependency is best-effort; search can be unavailable while URL paste keeps working.
 - The 4-digit PIN is a convenience, not authentication — it is displayed on the TV. The secret TV token is what protects remote host access.

@@ -50,14 +50,38 @@ type VideoCatalog interface {
 	Lookup(ctx context.Context, videoID string) (domain.VideoMeta, error)
 }
 
+// LibraryFormat selects the portable transfer representation.
+type LibraryFormat string
+
+const (
+	// FormatSQLite is a SQLite database file.
+	FormatSQLite LibraryFormat = "sqlite"
+	// FormatSQL is the app's own SQL dump format.
+	FormatSQL LibraryFormat = "sql"
+)
+
+// LibraryStatus describes the active library without exposing its secrets.
+type LibraryStatus struct {
+	Backend    string
+	Connected  bool
+	CacheOnly  bool
+	Songs      int
+	LastSyncAt time.Time
+	LastError  string
+}
+
 // SongLibrary is the local song store searched before the upstream catalog.
 // Saving the same video twice updates it instead of creating a duplicate.
 type SongLibrary interface {
 	Search(ctx context.Context, query string, limit int) ([]domain.SearchResult, error)
+	// Cache updates memory immediately and writes durably best-effort.
+	Cache(ctx context.Context, songs []domain.SearchResult) error
+	// Save waits for durable storage; the cache is unchanged on failure.
 	Save(ctx context.Context, songs []domain.SearchResult) error
 	Count(ctx context.Context) (int, error)
-	Export(ctx context.Context, w io.Writer) error
-	Import(ctx context.Context, r io.Reader) (int, error)
+	Status(ctx context.Context) LibraryStatus
+	Export(ctx context.Context, format LibraryFormat, w io.Writer) error
+	Import(ctx context.Context, format LibraryFormat, r io.Reader) (int, error)
 }
 
 // EmbedProber checks whether a video can be played in an iframe.

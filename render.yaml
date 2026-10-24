@@ -3,6 +3,9 @@
 # Rooms and the WebSocket hub live in process memory, so the service must run
 # as a single instance (Render's default). The free plan sleeps after 15 minutes
 # without traffic, which ends every room: use a paid plan for real events.
+#
+# The song library lives in Cloudflare D1 through the Worker in workers/library.
+# No Render disk and no paid Render plan are required.
 services:
   - type: web
     name: fana-karaoke
@@ -12,6 +15,8 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /healthz
+    # Rooms and WebSockets are process-local: never scale beyond one instance.
+    numInstances: 1
     autoDeployTrigger: commit
     envVars:
       # Kept stable across deploys so host/device cookies stay valid.
@@ -22,9 +27,13 @@ services:
       # Enables /admin; copy the generated value from the Render dashboard.
       - key: ADMIN_TOKEN
         generateValue: true
-    # The song library is written to /data/library.sqlite (set in the image).
-    # Attach a disk on a paid plan so it survives deploys, then uncomment:
-    # disk:
-    #   name: library
-    #   mountPath: /data
-    #   sizeGB: 1
+      # Durable library. Paste the Worker URL and shared secret in the dashboard
+      # after deploying workers/library (see the README runbook).
+      - key: LIBRARY_BACKEND
+        value: d1
+      - key: LIBRARY_PROXY_URL
+        sync: false
+      - key: LIBRARY_PROXY_TOKEN
+        sync: false
+      - key: LIBRARY_WARMUP_TIMEOUT
+        value: 10s

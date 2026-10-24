@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"io"
 	"testing"
 	"time"
@@ -14,10 +15,13 @@ import (
 )
 
 type fakeLibrary struct {
-	songs   []domain.SearchResult
-	saved   []domain.SearchResult
-	total   int
-	readErr error
+	songs    []domain.SearchResult
+	saved    []domain.SearchResult
+	cached   []domain.SearchResult
+	total    int
+	readErr  error
+	saveErr  error
+	cacheErr error
 }
 
 func (f *fakeLibrary) Search(context.Context, string, int) ([]domain.SearchResult, error) {
@@ -28,16 +32,33 @@ func (f *fakeLibrary) Search(context.Context, string, int) ([]domain.SearchResul
 }
 
 func (f *fakeLibrary) Save(_ context.Context, songs []domain.SearchResult) error {
+	if f.saveErr != nil {
+		return f.saveErr
+	}
 	f.saved = append(f.saved, songs...)
 	f.total += len(songs)
 	return nil
 }
 
+func (f *fakeLibrary) Cache(_ context.Context, songs []domain.SearchResult) error {
+	if f.cacheErr != nil {
+		return f.cacheErr
+	}
+	f.cached = append(f.cached, songs...)
+	return nil
+}
+
 func (f *fakeLibrary) Count(context.Context) (int, error) { return f.total, nil }
 
-func (f *fakeLibrary) Export(context.Context, io.Writer) error { return nil }
+func (f *fakeLibrary) Status(context.Context) ports.LibraryStatus {
+	return ports.LibraryStatus{Backend: "fake", Connected: true, Songs: f.total}
+}
 
-func (f *fakeLibrary) Import(context.Context, io.Reader) (int, error) { return 0, nil }
+func (f *fakeLibrary) Export(context.Context, ports.LibraryFormat, io.Writer) error { return nil }
+
+func (f *fakeLibrary) Import(context.Context, ports.LibraryFormat, io.Reader) (int, error) {
+	return 0, nil
+}
 
 type countingCatalog struct {
 	results []domain.SearchResult
@@ -77,8 +98,8 @@ func TestSearchFallsBackOnlineAndRemembersHits(t *testing.T) {
 	if err != nil || len(results) != 1 || upstream.hits != 1 {
 		t.Fatalf("online search = %+v hits=%d err=%v", results, upstream.hits, err)
 	}
-	if len(lib.saved) != 1 || lib.saved[0].VideoID != "bbbbbbbbbbb" {
-		t.Fatalf("online hits were not saved: %+v", lib.saved)
+	if len(lib.cached) != 1 || lib.cached[0].VideoID != "bbbbbbbbbbb" {
+		t.Fatalf("online hits were not cached: %+v", lib.cached)
 	}
 }
 
@@ -88,6 +109,26 @@ func TestSearchIgnoresLibraryFailures(t *testing.T) {
 	service := &CatalogService{Deps: Deps{Library: lib, Catalog: upstream}}
 	if _, _, err := service.Search(context.Background(), "hello"); err != nil {
 		t.Fatalf("a broken library must not break search: %v", err)
+	}
+}
+
+func TestAddSongRejectsFailedDurableSave(t *testing.T) {
+	lib := &fakeLibrary{saveErr: domain.ErrLibraryUnavailable}
+	catalog := &fakeCatalog{meta: map[string]domain.VideoMeta{
+		"aaaaaaaaaaa": {VideoID: "aaaaaaaaaaa", Title: "Played song", Channel: "Karaoke", DurationSeconds: 200},
+	}}
+	f := NewFacade(Deps{
+		Rooms: memory.NewRoomRepo(), Devices: memory.NewDeviceRepo(), Events: noopPublisher{},
+		Catalog: catalog, Library: lib, Clock: clock.NewFake(time.Now()), IDs: crypto.NewIDs(),
+		Cfg: ports.Config{MaxRooms: 10, MaxGuests: 25, MaxQueue: 100, RoomTTL: time.Hour},
+	})
+	code := mustRoom(t, f)
+	_, err := f.AddSong(context.Background(), code, "dev-a", "guest", "Alex", "aaaaaaaaaaa", "")
+	if !errors.Is(err, domain.ErrLibraryUnavailable) {
+		t.Fatalf("add error = %v", err)
+	}
+	if snap := mustSnapshot(t, f, code, "dev-a", "guest"); len(snap.Queue) != 0 {
+		t.Fatalf("failed save queued a song: %+v", snap.Queue)
 	}
 }
 

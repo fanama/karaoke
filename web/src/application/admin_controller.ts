@@ -8,6 +8,7 @@ function createAdminState() {
   return {
     session: writable<AdminSession | null>(null),
     token: writable(''),
+    format: writable<'sqlite' | 'sql'>('sqlite'),
     busy: writable(false),
     error: writable(''),
     notice: writable('')
@@ -16,16 +17,15 @@ function createAdminState() {
 
 type AdminState = ReturnType<typeof createAdminState>;
 
-/** Admin page state: token login and SQLite library transfer. */
+/** Admin page state: token login and library transfer. */
 export function createAdminController(deps: AppDependencies) {
   const state = createAdminState();
   const actions = new AdminActions(state, deps);
   return {
     ...state,
     load: () => actions.load(),
-    login: () => actions.login(),
-    logout: () => actions.logout(),
-    importLibrary: (file: File) => actions.importLibrary(file)
+    login: () => actions.login(),		logout: () => actions.logout(),
+		importLibrary: (file: File) => actions.importLibrary(file)
   };
 }
 
@@ -73,8 +73,7 @@ class AdminActions {
     this.state.busy.set(true);
     this.state.error.set('');
     this.state.notice.set('');
-    try {
-      const res = await this.deps.api.adminImport(file);
+    try {		const res = await this.deps.api.adminImport(file, get(this.state.format));
       this.state.notice.set(get(tr)('admin.imported', { count: res.imported, total: res.songs }));
       await this.load();
     } catch (err) {

@@ -1,6 +1,8 @@
 package httpapi
 
 import (
+	"bytes"
+	"encoding/json"
 	"io"
 	"net/http"
 	"strings"
@@ -12,6 +14,13 @@ type adminSessionResponse struct {
 	Authenticated bool `json:"authenticated"`
 	Library       bool `json:"library"`
 	Songs         int  `json:"songs"`
+	Storage       *struct {
+		Backend   string `json:"backend"`
+		Connected bool   `json:"connected"`
+		CacheOnly bool   `json:"cacheOnly"`
+		Songs     int    `json:"songs"`
+		LastError string `json:"lastError"`
+	} `json:"storage"`
 }
 
 func readAdminSession(t *testing.T, client *http.Client, base string) adminSessionResponse {
@@ -45,6 +54,9 @@ func TestAdminLibraryTransfer(t *testing.T) {
 	if status != http.StatusOK || !session.Authenticated || !session.Library || session.Songs != 1 {
 		t.Fatalf("login: %d %s (%+v)", status, raw, session)
 	}
+	if session.Storage == nil || session.Storage.Backend != "sqlite" || !session.Storage.Connected {
+		t.Fatalf("storage status: %+v", session.Storage)
+	}
 	archive := downloadLibrary(t, guest, ts.URL+"/api/admin/library/export")
 	imported := importLibrary(t, guest, ts.URL+"/api/admin/library/import", archive)
 	if imported.Imported != 1 || imported.Songs != 1 {
@@ -56,6 +68,33 @@ func TestAdminLibraryTransfer(t *testing.T) {
 	}
 	if after := readAdminSession(t, guest, ts.URL); after.Authenticated {
 		t.Fatal("logout must clear the admin cookie")
+	}
+}
+
+func TestAdminSQLTransfer(t *testing.T) {
+	ts, host, guest := newTestServer(t)
+	created := createRoom(t, host, ts.URL)
+	assertSongAdded(t, guest, ts.URL, created)
+	callJSON(t, guest, http.MethodPost, ts.URL+"/api/admin/login",
+		map[string]string{"token": "test-admin-token-long"}, nil)
+	dump := downloadLibrary(t, guest, ts.URL+"/api/admin/library/export?format=sql")
+	if !bytes.HasPrefix(dump, []byte("-- fana-karaoke-library v1")) {
+		t.Fatalf("SQL export header: %q", dump[:min(len(dump), 40)])
+	}
+	res, err := guest.Post(ts.URL+"/api/admin/library/import?format=sql", "application/sql", bytes.NewReader(dump))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer res.Body.Close()
+	var out struct {
+		Imported int `json:"imported"`
+		Songs    int `json:"songs"`
+	}
+	if res.StatusCode != http.StatusOK || json.NewDecoder(res.Body).Decode(&out) != nil || out.Imported != 1 {
+		t.Fatalf("SQL import: %d %+v", res.StatusCode, out)
+	}
+	if status, _ := callJSON(t, guest, http.MethodGet, ts.URL+"/api/admin/library/export?format=nope", nil, nil); status != http.StatusBadRequest {
+		t.Fatalf("invalid format: %d", status)
 	}
 }
 

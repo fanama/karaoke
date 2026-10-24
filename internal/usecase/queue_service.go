@@ -75,14 +75,16 @@ func (s *QueueService) lookup(ctx context.Context, videoID string) (domain.Video
 	if meta.ThumbnailURL == "" {
 		meta.ThumbnailURL = domain.ThumbnailURL(meta.VideoID)
 	}
-	s.rememberSong(ctx, meta)
+	if err := s.rememberSong(ctx, meta); err != nil {
+		return domain.VideoMeta{}, err
+	}
 	return meta, nil
 }
 
 // rememberSong keeps every played or pasted song in the local library.
-func (s *QueueService) rememberSong(ctx context.Context, meta domain.VideoMeta) {
+func (s *QueueService) rememberSong(ctx context.Context, meta domain.VideoMeta) error {
 	if s.Library == nil {
-		return
+		return nil
 	}
 	song := domain.SearchResult{
 		VideoID:         meta.VideoID,
@@ -91,7 +93,7 @@ func (s *QueueService) rememberSong(ctx context.Context, meta domain.VideoMeta) 
 		ThumbnailURL:    meta.ThumbnailURL,
 		DurationSeconds: meta.DurationSeconds,
 	}
-	_ = s.Library.Save(ctx, []domain.SearchResult{song})
+	return s.Library.Save(ctx, []domain.SearchResult{song})
 }
 
 func (s *QueueService) appendSong(code, deviceID, role, nickname string, meta domain.VideoMeta) (*domain.Snapshot, error) {

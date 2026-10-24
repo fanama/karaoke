@@ -1,0 +1,16 @@
+# Replace the database id after:
+#   npx wrangler d1 create fana-library --location=weur
+#
+# Deploy with:
+#   npx wrangler secret put LIBRARY_PROXY_TOKEN
+#   npx wrangler deploy
+name = "fana-library"
+main = "src/index.ts"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "fana-library"
+database_id = "REPLACE_WITH_DATABASE_ID"
+migrations_dir = "migrations"

@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"fana-karaoke/internal/domain"
+	"fana-karaoke/internal/ports"
 )
 
 const maxLibraryUpload = 64 << 20
@@ -32,7 +33,7 @@ func (s *Server) handleLibraryExport(w http.ResponseWriter, r *http.Request) {
 	if !s.requireHost(w, r, code) {
 		return
 	}
-	s.writeLibraryExport(w, r)
+	s.writeLibraryExport(w, r, ports.FormatSQLite)
 }
 
 func (s *Server) handleLibraryImport(w http.ResponseWriter, r *http.Request) {
@@ -44,29 +45,33 @@ func (s *Server) handleLibraryImport(w http.ResponseWriter, r *http.Request) {
 		s.writeError(w, rateLimited("Too many library imports.", retry))
 		return
 	}
-	s.importLibrary(w, r)
+	s.importLibrary(w, r, ports.FormatSQLite)
 }
 
-// writeLibraryExport streams the SQLite library as a download.
-func (s *Server) writeLibraryExport(w http.ResponseWriter, r *http.Request) {
+// writeLibraryExport streams the library in the requested format.
+func (s *Server) writeLibraryExport(w http.ResponseWriter, r *http.Request, format ports.LibraryFormat) {
 	ctx, cancel := context.WithTimeout(r.Context(), 30*time.Second)
 	defer cancel()
-	name := fmt.Sprintf("fana-library-%s.sqlite", time.Now().UTC().Format("20060102-150405"))
-	w.Header().Set("Content-Type", "application/vnd.sqlite3")
+	extension, contentType := "sqlite", "application/vnd.sqlite3"
+	if format == ports.FormatSQL {
+		extension, contentType = "sql", "application/sql; charset=utf-8"
+	}
+	name := fmt.Sprintf("fana-library-%s.%s", time.Now().UTC().Format("20060102-150405"), extension)
+	w.Header().Set("Content-Type", contentType)
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%q", name))
 	w.Header().Set("Cache-Control", "no-store")
-	if err := s.svc.ExportLibrary(ctx, w); err != nil {
+	if err := s.svc.ExportLibrary(ctx, format, w); err != nil {
 		s.log.Error("library export", "error", err)
 	}
 }
 
-// importLibrary merges an uploaded SQLite file and reports the new total.
-func (s *Server) importLibrary(w http.ResponseWriter, r *http.Request) {
+// importLibrary merges an uploaded library and reports the new total.
+func (s *Server) importLibrary(w http.ResponseWriter, r *http.Request, format ports.LibraryFormat) {
 	body := http.MaxBytesReader(w, r.Body, maxLibraryUpload)
 	defer body.Close()
 	ctx, cancel := context.WithTimeout(r.Context(), 60*time.Second)
 	defer cancel()
-	imported, err := s.svc.ImportLibrary(ctx, body)
+	imported, err := s.svc.ImportLibrary(ctx, format, body)
 	if err != nil {
 		s.writeError(w, libraryError(err))
 		return
@@ -77,6 +82,17 @@ func (s *Server) importLibrary(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	s.writeJSON(w, http.StatusOK, map[string]int{"imported": imported, "songs": total})
+}
+
+func (s *Server) libraryFormat(r *http.Request) (ports.LibraryFormat, error) {
+	switch r.URL.Query().Get("format") {
+	case "", "sqlite":
+		return ports.FormatSQLite, nil
+	case "sql":
+		return ports.FormatSQL, nil
+	default:
+		return "", domain.ErrInvalidInput
+	}
 }
 
 // libraryError turns an oversized upload into the matching public error.

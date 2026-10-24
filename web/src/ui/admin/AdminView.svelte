@@ -6,7 +6,7 @@
   import LanguageToggle from '../common/LanguageToggle.svelte';
 
   const c = createAdminController(getAppContext());
-  const { session, token, busy, error, notice, load, login, logout, importLibrary } = c;
+  const { session, token, format, busy, error, notice, load, login, logout, importLibrary } = c;
 
   onMount(() => {
     load();
@@ -17,6 +17,17 @@
     const file = input.files?.[0];
     if (file) importLibrary(file);
     input.value = '';
+  }
+
+  function backendLabel(backend: string): string {
+    if (backend === 'd1') return 'admin.backendD1';
+    if (backend === 'sqlite') return 'admin.backendSqlite';
+    return 'admin.backendNone';
+  }
+
+  function formatTime(value: string): string {
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
   }
 </script>
 
@@ -63,12 +74,42 @@
       </form>
     {:else}
       <div class="admin-library">
+        {#if $session.storage}
+          <div class="storage">
+            <div class="spread">
+              <span class="label">{$tr('admin.storage')}</span>
+              <span class="badge">{$tr(backendLabel($session.storage.backend))}</span>
+            </div>
+            <p class="tiny dim">
+              {$tr($session.storage.connected ? 'admin.connected' : 'admin.disconnected')}
+              {#if $session.storage.cacheOnly} · {$tr('admin.cacheOnly')}{/if}
+            </p>
+            {#if $session.storage.lastSyncAt}
+              <p class="tiny dim">
+                {$tr('admin.lastSync')}: {formatTime($session.storage.lastSyncAt)}
+              </p>
+            {/if}
+            {#if $session.storage.lastError}
+              <p class="notice">
+                {$tr('admin.lastError')}: {$session.storage.lastError}
+              </p>
+            {/if}
+          </div>
+        {/if}
+
         <p class="label">{$tr('admin.library')}</p>
         {#if $session.library}
           <p class="admin-count">{$tr('admin.count', { count: $session.songs })}</p>
           <p class="tiny dim">{$tr('admin.libraryBody')}</p>
+          <div class="field">
+            <label for="admin-format">{$tr('admin.format')}</label>
+            <select id="admin-format" class="input" bind:value={$format}>
+              <option value="sqlite">{$tr('admin.formatSqlite')}</option>
+              <option value="sql">{$tr('admin.formatSql')}</option>
+            </select>
+          </div>
           <div class="row">
-            <a class="btn btn-secondary" href="/api/admin/library/export" download>
+            <a class="btn btn-secondary" href={`/api/admin/library/export?format=${$format}`} download>
               {$tr('admin.export')}
             </a>
             <label class="btn btn-primary" class:disabled={$busy}>
@@ -76,7 +117,7 @@
               <input
                 class="hidden-file"
                 type="file"
-                accept=".sqlite,.sqlite3,.db,application/vnd.sqlite3,application/octet-stream"
+                accept=".sqlite,.sqlite3,.db,.sql,application/vnd.sqlite3,application/octet-stream,application/sql"
                 disabled={$busy}
                 on:change={pickFile}
               />
@@ -107,6 +148,15 @@
   .admin-library {
     display: grid;
     gap: 0.75rem;
+  }
+
+  .storage {
+    display: grid;
+    gap: 0.35rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.8rem;
+    background: var(--surface);
   }
 
   .admin-count {

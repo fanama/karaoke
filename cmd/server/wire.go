@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"io/fs"
 	"log/slog"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"fana-karaoke/internal/adapters/secondary/bus"
 	"fana-karaoke/internal/adapters/secondary/clock"
 	"fana-karaoke/internal/adapters/secondary/crypto"
+	songd1 "fana-karaoke/internal/adapters/secondary/d1"
 	"fana-karaoke/internal/adapters/secondary/invidious"
 	"fana-karaoke/internal/adapters/secondary/memory"
 	"fana-karaoke/internal/adapters/secondary/qrgen"
@@ -54,9 +56,23 @@ func newRepositories() repositories {
 	return repositories{rooms: memory.NewRoomRepo(), devices: memory.NewDeviceRepo()}
 }
 
-// newLibrary opens the SQLite song store. A failure only disables the local
-// cache: search keeps working through the upstream catalog.
+// newLibrary selects the durable song store. A D1 warm-up failure leaves the
+// adapter alive so reads keep working while writes are explicitly rejected.
 func newLibrary(cfg settings, log *slog.Logger) ports.SongLibrary {
+	switch cfg.LibraryBackend {
+	case "none":
+		return nil
+	case "d1":
+		return newD1Library(cfg, log)
+	case "file":
+		return newFileLibrary(cfg, log)
+	default:
+		log.Warn("unknown LIBRARY_BACKEND; using file", "value", cfg.LibraryBackend)
+		return newFileLibrary(cfg, log)
+	}
+}
+
+func newFileLibrary(cfg settings, log *slog.Logger) ports.SongLibrary {
 	if cfg.LibraryPath == "" {
 		log.Warn("LIBRARY_PATH is empty; the local song library is disabled")
 		return nil
@@ -66,7 +82,25 @@ func newLibrary(cfg settings, log *slog.Logger) ports.SongLibrary {
 		log.Warn("song library unavailable; every search will go online", "path", cfg.LibraryPath, "error", err)
 		return nil
 	}
-	log.Info("song library ready", "path", cfg.LibraryPath)
+	log.Info("song library ready", "backend", "file", "path", cfg.LibraryPath)
+	return library
+}
+
+func newD1Library(cfg settings, log *slog.Logger) ports.SongLibrary {
+	library := songd1.New(songd1.Config{
+		BaseURL:           cfg.LibraryProxyURL,
+		Token:             cfg.LibraryProxyToken,
+		ReadTimeout:       cfg.LibraryRead,
+		WriteTimeout:      cfg.LibraryWrite,
+		CacheWriteTimeout: cfg.LibraryCacheWrite,
+		WarmupTimeout:     cfg.LibraryWarmup,
+		Log:               log,
+	})
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.LibraryWarmup)
+	defer cancel()
+	if err := library.Warm(ctx); err != nil {
+		log.Warn("d1 song library is cache-only; new songs will be rejected until it recovers", "error", err)
+	}
 	return library
 }
 

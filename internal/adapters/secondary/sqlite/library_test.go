@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"fana-karaoke/internal/domain"
+	"fana-karaoke/internal/ports"
 )
 
 func openTestLibrary(t *testing.T) *Library {
@@ -100,18 +101,18 @@ func TestExportImportRoundTrip(t *testing.T) {
 		song("bbbbbbbbbbb", "Second Karaoke", "B", 210),
 	)
 	var archive bytes.Buffer
-	if err := source.Export(context.Background(), &archive); err != nil {
+	if err := source.Export(context.Background(), ports.FormatSQLite, &archive); err != nil {
 		t.Fatal(err)
 	}
 	if !bytes.HasPrefix(archive.Bytes(), []byte("SQLite format 3\x00")) {
 		t.Fatalf("export is not a SQLite file: %q", archive.Bytes()[:16])
 	}
 	target := openTestLibrary(t)
-	imported, err := target.Import(context.Background(), bytes.NewReader(archive.Bytes()))
+	imported, err := target.Import(context.Background(), ports.FormatSQLite, bytes.NewReader(archive.Bytes()))
 	if err != nil || imported != 2 {
 		t.Fatalf("imported = %d err=%v", imported, err)
 	}
-	if _, err := target.Import(context.Background(), bytes.NewReader(archive.Bytes())); err != nil {
+	if _, err := target.Import(context.Background(), ports.FormatSQLite, bytes.NewReader(archive.Bytes())); err != nil {
 		t.Fatal(err)
 	}
 	total, err := target.Count(context.Background())
@@ -124,9 +125,27 @@ func TestExportImportRoundTrip(t *testing.T) {
 	}
 }
 
+func TestSQLExportImportRoundTrip(t *testing.T) {
+	source := openTestLibrary(t)
+	saveSongs(t, source, song("aaaaaaaaaaa", "L'été Karaoke", "Studio", 200))
+	var dump bytes.Buffer
+	if err := source.Export(context.Background(), ports.FormatSQL, &dump); err != nil {
+		t.Fatal(err)
+	}
+	target := openTestLibrary(t)
+	imported, err := target.Import(context.Background(), ports.FormatSQL, bytes.NewReader(dump.Bytes()))
+	if err != nil || imported != 1 {
+		t.Fatalf("SQL import = %d %v", imported, err)
+	}
+	found, _ := target.Search(context.Background(), "ete", 20)
+	if len(found) != 1 {
+		t.Fatalf("SQL-imported song = %+v", found)
+	}
+}
+
 func TestImportRejectsInvalidFile(t *testing.T) {
 	lib := openTestLibrary(t)
-	_, err := lib.Import(context.Background(), strings.NewReader("not a database"))
+	_, err := lib.Import(context.Background(), ports.FormatSQLite, strings.NewReader("not a database"))
 	if !errors.Is(err, domain.ErrLibraryInvalid) {
 		t.Fatalf("invalid import error = %v", err)
 	}

@@ -97,11 +97,21 @@ export interface TVSession {
   pin: string;
 }
 
+export interface LibraryStorageView {
+  backend: 'd1' | 'sqlite' | 'none' | string;
+  connected: boolean;
+  cacheOnly: boolean;
+  songs: number;
+  lastSyncAt: string;
+  lastError: string;
+}
+
 export interface AdminSession {
   enabled: boolean;
   authenticated: boolean;
   library: boolean;
   songs: number;
+  storage?: LibraryStorageView;
 }
 
 export interface QueueSelection {

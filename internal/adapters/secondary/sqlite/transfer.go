@@ -5,15 +5,28 @@ import (
 	"database/sql"
 	"io"
 	"os"
+	"time"
 
 	"fana-karaoke/internal/domain"
+	"fana-karaoke/internal/ports"
 )
 
 // MaxImportBytes is the largest library file the server accepts.
 const MaxImportBytes = 128 << 20
 
-// Export writes a compact, self-contained copy of the database.
-func (l *Library) Export(ctx context.Context, w io.Writer) error {
+// Export writes a portable copy of the library in the requested format.
+func (l *Library) Export(ctx context.Context, format ports.LibraryFormat, w io.Writer) error {
+	switch format {
+	case ports.FormatSQLite:
+		return l.exportSQLite(ctx, w)
+	case ports.FormatSQL:
+		return l.exportSQL(ctx, w)
+	default:
+		return domain.ErrInvalidInput
+	}
+}
+
+func (l *Library) exportSQLite(ctx context.Context, w io.Writer) error {
 	name, cleanup, err := tempName("fana-library-*.sqlite")
 	if err != nil {
 		return err
@@ -31,8 +44,19 @@ func (l *Library) Export(ctx context.Context, w io.Writer) error {
 	return err
 }
 
-// Import merges the songs of an uploaded library and returns how many it read.
-func (l *Library) Import(ctx context.Context, r io.Reader) (int, error) {
+// Import merges an uploaded library and returns the distinct songs read.
+func (l *Library) Import(ctx context.Context, format ports.LibraryFormat, r io.Reader) (int, error) {
+	switch format {
+	case ports.FormatSQLite:
+		return l.importSQLite(ctx, r)
+	case ports.FormatSQL:
+		return l.importSQL(ctx, r)
+	default:
+		return 0, domain.ErrInvalidInput
+	}
+}
+
+func (l *Library) importSQLite(ctx context.Context, r io.Reader) (int, error) {
 	name, cleanup, err := tempName("fana-import-*.sqlite")
 	if err != nil {
 		return 0, err
@@ -45,14 +69,22 @@ func (l *Library) Import(ctx context.Context, r io.Reader) (int, error) {
 	if written > MaxImportBytes {
 		return 0, domain.ErrLibraryTooLarge
 	}
-	songs, err := readLibrary(ctx, name)
+	songs, err := readLibrarySongs(ctx, name)
 	if err != nil {
 		return 0, domain.ErrLibraryInvalid
 	}
-	if err := l.Save(ctx, songs); err != nil {
+	return l.storeImported(ctx, songs)
+}
+
+func (l *Library) storeImported(ctx context.Context, songs []domain.LibrarySong) (int, error) {
+	songs, err := validateStored(songs)
+	if err != nil {
 		return 0, err
 	}
-	return len(validSongs(songs)), nil
+	if err := l.saveSongs(ctx, songs); err != nil {
+		return 0, err
+	}
+	return len(songs), nil
 }
 
 func writeTemp(name string, r io.Reader) (int64, error) {
@@ -78,27 +110,19 @@ func tempName(pattern string) (string, func(), error) {
 	return name, func() { _ = os.Remove(name) }, nil
 }
 
-func readLibrary(ctx context.Context, path string) ([]domain.SearchResult, error) {
+func readLibrarySongs(ctx context.Context, path string) ([]domain.LibrarySong, error) {
 	db, err := sql.Open("sqlite", "file:"+path+"?mode=ro")
 	if err != nil {
 		return nil, err
 	}
 	defer db.Close()
 	db.SetMaxOpenConns(1)
-	rows, err := db.QueryContext(ctx,
-		`SELECT video_id, title, channel, thumbnail_url, duration_seconds FROM songs`)
-	if err != nil {
-		return nil, err
+	return queryLibrarySongs(ctx, db)
+}
+
+func parseStamp(value string) time.Time {
+	if t, err := time.Parse(time.RFC3339, value); err == nil {
+		return t
 	}
-	defer rows.Close()
-	var songs []domain.SearchResult
-	for rows.Next() {
-		var song domain.SearchResult
-		if err := rows.Scan(&song.VideoID, &song.Title, &song.Channel,
-			&song.ThumbnailURL, &song.DurationSeconds); err != nil {
-			return nil, err
-		}
-		songs = append(songs, song)
-	}
-	return songs, rows.Err()
+	return time.Time{}
 }

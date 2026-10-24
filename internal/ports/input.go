@@ -55,8 +55,9 @@ type CatalogQueries interface {
 // LibraryCommands inspects, exports and merges the local song library.
 type LibraryCommands interface {
 	LibraryStats(ctx context.Context) (int, error)
-	ExportLibrary(ctx context.Context, w io.Writer) error
-	ImportLibrary(ctx context.Context, r io.Reader) (int, error)
+	LibraryInfo(ctx context.Context) (LibraryStatus, error)
+	ExportLibrary(ctx context.Context, format LibraryFormat, w io.Writer) error
+	ImportLibrary(ctx context.Context, format LibraryFormat, r io.Reader) (int, error)
 }
 
 // KaraokeService is the single facade the primary adapters depend on.

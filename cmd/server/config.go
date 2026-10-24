@@ -13,37 +13,51 @@ import (
 
 // settings is everything the wiring layer needs from the environment.
 type settings struct {
-	LogLevel    slog.Level
-	Dev         bool
-	Port        string
-	BaseURL     string
-	Secret      []byte
-	Instances   []string
-	Region      string
-	QueryTTL    time.Duration
-	StaleTTL    time.Duration
-	VideoTTL    time.Duration
-	LibraryPath string
-	AdminToken  string
-	TrustProxy  bool
-	Limits      ports.Config
+	LogLevel          slog.Level
+	Dev               bool
+	Port              string
+	BaseURL           string
+	Secret            []byte
+	Instances         []string
+	Region            string
+	QueryTTL          time.Duration
+	StaleTTL          time.Duration
+	VideoTTL          time.Duration
+	LibraryPath       string
+	LibraryBackend    string
+	LibraryProxyURL   string
+	LibraryProxyToken string
+	LibraryWarmup     time.Duration
+	LibraryRead       time.Duration
+	LibraryWrite      time.Duration
+	LibraryCacheWrite time.Duration
+	AdminToken        string
+	TrustProxy        bool
+	Limits            ports.Config
 }
 
 func loadSettings(log *slog.Logger) settings {
 	return settings{
-		LogLevel:    logLevel(),
-		Dev:         envBool("DEV", false),
-		Port:        env("PORT", "8080"),
-		BaseURL:     baseURL(),
-		Secret:      loadSecret(log),
-		Instances:   splitList(env("INVIDIOUS_INSTANCES", defaultInstances)),
-		Region:      env("YOUTUBE_REGION", "FR"),
-		QueryTTL:    envDuration("SEARCH_CACHE_TTL", 24*time.Hour),
-		StaleTTL:    envDuration("SEARCH_STALE_TTL", 7*24*time.Hour),
-		VideoTTL:    envDuration("SEARCH_VIDEO_TTL", 7*24*time.Hour),
-		LibraryPath: env("LIBRARY_PATH", "./data/library.sqlite"),
-		AdminToken:  strings.TrimSpace(env("ADMIN_TOKEN", "")),
-		TrustProxy:  envBool("TRUST_PROXY", false),
+		LogLevel:          logLevel(),
+		Dev:               envBool("DEV", false),
+		Port:              env("PORT", "8080"),
+		BaseURL:           baseURL(),
+		Secret:            loadSecret(log),
+		Instances:         splitList(env("INVIDIOUS_INSTANCES", defaultInstances)),
+		Region:            env("YOUTUBE_REGION", "FR"),
+		QueryTTL:          envDuration("SEARCH_CACHE_TTL", 24*time.Hour),
+		StaleTTL:          envDuration("SEARCH_STALE_TTL", 7*24*time.Hour),
+		VideoTTL:          envDuration("SEARCH_VIDEO_TTL", 7*24*time.Hour),
+		LibraryPath:       env("LIBRARY_PATH", "./data/library.sqlite"),
+		LibraryBackend:    strings.ToLower(strings.TrimSpace(env("LIBRARY_BACKEND", "file"))),
+		LibraryProxyURL:   strings.TrimRight(strings.TrimSpace(env("LIBRARY_PROXY_URL", "")), "/"),
+		LibraryProxyToken: strings.TrimSpace(env("LIBRARY_PROXY_TOKEN", "")),
+		LibraryWarmup:     envDuration("LIBRARY_WARMUP_TIMEOUT", 10*time.Second),
+		LibraryRead:       envDuration("LIBRARY_READ_TIMEOUT", 10*time.Second),
+		LibraryWrite:      envDuration("LIBRARY_WRITE_TIMEOUT", 5*time.Second),
+		LibraryCacheWrite: envDuration("LIBRARY_CACHE_WRITE_TIMEOUT", 5*time.Second),
+		AdminToken:        strings.TrimSpace(env("ADMIN_TOKEN", "")),
+		TrustProxy:        envBool("TRUST_PROXY", false),
 		Limits: ports.Config{
 			MaxRooms:  envInt("MAX_ROOMS", 1000),
 			MaxGuests: envInt("MAX_GUESTS", 25),

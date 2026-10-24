@@ -66,8 +66,8 @@ function adminMethods(fetcher: FetchLike): AdminMethods {
     adminSession: () => request(fetcher, '/api/admin/session'),
     adminLogin: (token: string) => request(fetcher, '/api/admin/login', post({ token })),
     adminLogout: () => request(fetcher, '/api/admin/logout', post({})),
-    adminImport: (file: File) =>
-      request(fetcher, '/api/admin/library/import', {
+    adminImport: (file: File, format: 'sqlite' | 'sql') =>
+      request(fetcher, `/api/admin/library/import?format=${format}`, {
         method: 'POST',
         body: file,
         headers: { 'Content-Type': 'application/octet-stream' }

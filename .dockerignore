@@ -5,3 +5,7 @@ fana-karaoke
 *.log
 web/test-results
 web/playwright-report
+workers/library/node_modules
+workers/library/.wrangler
+workers/library/.dev.vars
+workers/library/dist

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -56,6 +57,35 @@ func warnConfig(log *slog.Logger, cfg settings) {
 		log.Info("ADMIN_TOKEN is not set; the /admin page is disabled")
 	} else if len(cfg.AdminToken) < 16 {
 		log.Warn("ADMIN_TOKEN is short; use at least 16 random characters")
+	}
+	warnLibrary(log, cfg)
+}
+
+func warnLibrary(log *slog.Logger, cfg settings) {
+	switch cfg.LibraryBackend {
+	case "none":
+		log.Info("song library disabled by LIBRARY_BACKEND=none")
+	case "d1":
+		warnD1(log, cfg)
+	case "file":
+		if cfg.LibraryPath == "" {
+			log.Warn("LIBRARY_PATH is empty; the local song library is disabled")
+		}
+	default:
+		log.Warn("unknown LIBRARY_BACKEND; falling back to file", "value", cfg.LibraryBackend)
+	}
+}
+
+func warnD1(log *slog.Logger, cfg settings) {
+	if cfg.LibraryProxyURL == "" || cfg.LibraryProxyToken == "" {
+		log.Warn("LIBRARY_BACKEND=d1 needs LIBRARY_PROXY_URL and LIBRARY_PROXY_TOKEN; starting cache-only")
+		return
+	}
+	if strings.HasPrefix(cfg.LibraryProxyURL, "http://") && !strings.Contains(cfg.LibraryProxyURL, "localhost") && !strings.Contains(cfg.LibraryProxyURL, "127.0.0.1") {
+		log.Warn("LIBRARY_PROXY_URL should use HTTPS outside local development")
+	}
+	if len(cfg.LibraryProxyToken) < 32 {
+		log.Warn("LIBRARY_PROXY_TOKEN is short; use at least 32 random characters")
 	}
 }
 

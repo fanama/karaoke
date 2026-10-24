@@ -1,4 +1,4 @@
-.PHONY: build web server dev-web test fmt e2e clean
+.PHONY: build web server dev-web test fmt e2e clean worker-install worker-test worker-dev worker-deploy
 
 build: web
 	go build -o fana-karaoke ./cmd/server
@@ -19,6 +19,18 @@ test:
 
 e2e:
 	cd web && node e2e/flow.mjs && node e2e/autoplay.mjs && node e2e/audit.mjs && node e2e/voting.mjs
+
+worker-install:
+	cd workers/library && npm ci
+
+worker-test:
+	cd workers/library && npm test && npm run check
+
+worker-dev:
+	cd workers/library && npx wrangler dev --local
+
+worker-deploy:
+	cd workers/library && npx wrangler deploy
 
 fmt:
 	gofmt -w cmd internal web/embed.go
