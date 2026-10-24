@@ -16,12 +16,24 @@
   export let manageOpen: Writable<boolean>;
   export let confirmClear: Writable<boolean>;
   export let confirmEnd: Writable<boolean>;
+  export let libraryCount: Writable<number | null>;
+  export let libraryBusy: Writable<boolean>;
+  export let libraryError: Writable<string>;
+  export let code: string;
   export let locked: boolean;
   export let onSubmit: () => void;
   export let onUnlock: () => void;
   export let onToggleLock: () => void;
   export let onClear: () => void;
   export let onEnd: () => void;
+  export let onImportLibrary: (file: File) => void;
+
+  function pickLibraryFile(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) onImportLibrary(file);
+    input.value = '';
+  }
 
   function focusOnMount(node: HTMLInputElement) {
     const timer = setTimeout(() => node.focus(), 60);
@@ -110,6 +122,30 @@
       </div>
     {/if}
     <hr />
+    <div class="library">
+      <p class="label">{$tr('room.library')}</p>
+      <p class="tiny dim">{$tr('room.libraryBody')}</p>
+      {#if $libraryCount !== null}
+        <p class="tiny dim">{$tr('room.libraryCount', { count: $libraryCount })}</p>
+      {/if}
+      <div class="row">
+        <a class="btn btn-secondary btn-sm" href={`/api/rooms/${code}/library/export`} download>
+          {$tr('room.libraryExport')}
+        </a>
+        <label class="btn btn-secondary btn-sm" class:disabled={$libraryBusy}>
+          {$tr($libraryBusy ? 'room.libraryImporting' : 'room.libraryImport')}
+          <input
+            class="hidden-file"
+            type="file"
+            accept=".sqlite,.sqlite3,.db,application/vnd.sqlite3,application/octet-stream"
+            disabled={$libraryBusy}
+            on:change={pickLibraryFile}
+          />
+        </label>
+      </div>
+      {#if $libraryError}<p class="error-text">{$libraryError}</p>{/if}
+    </div>
+    <hr />
     {#if !$confirmEnd}
       <button class="btn btn-danger" type="button" on:click={() => confirmEnd.set(true)}>{$tr('room.endRoom')}</button>
     {:else}
@@ -181,5 +217,14 @@
     border: 0;
     border-top: 1px solid var(--border);
     margin: 0.2rem 0;
+  }
+
+  .library {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .hidden-file {
+    display: none;
   }
 </style>

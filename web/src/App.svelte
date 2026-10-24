@@ -3,6 +3,7 @@
   import { tr } from './application/i18n';
   import { setAppContext, type AppDependencies } from './ports/context';
   import LanguageToggle from './ui/common/LanguageToggle.svelte';
+  import AdminView from './ui/admin/AdminView.svelte';
   import GuestRoomView from './ui/guest/GuestRoomView.svelte';
   import TvRoomView from './ui/tv/TvRoomView.svelte';
   import WelcomeView from './ui/welcome/WelcomeView.svelte';
@@ -28,6 +29,8 @@
 
 {#if path === '/'}
   <WelcomeView />
+{:else if path === '/admin'}
+  <AdminView />
 {:else if guest}
   <GuestRoomView code={decodeURIComponent(guest[1]).toLowerCase()} />
 {:else if tv}

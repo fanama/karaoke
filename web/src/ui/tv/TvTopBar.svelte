@@ -13,6 +13,8 @@
 </script>
 
 <header class="tv-top">
+  <TvJoinPanel {code} {pin} />
+
   <div class="room-mark">
     <p class="label">{$tr('room.code')}</p>
     <h1 class="tv-code">{code.toUpperCase()}</h1>
@@ -21,8 +23,6 @@
       <span class="tv-stat">{$tr('tv.guestCount', { count: guestCount })}</span>
     </div>
   </div>
-
-  <TvJoinPanel {code} {pin} />
 
   <div class="tv-tools">
     <LanguageToggle />
@@ -44,8 +44,7 @@
     z-index: 10;
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
-    gap: 1.5rem;
+    gap: 1.2rem;
     padding: 1.4rem 1.7rem;
     pointer-events: none;
   }
@@ -79,6 +78,7 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    margin-left: auto;
   }
 
   .tool-btn {

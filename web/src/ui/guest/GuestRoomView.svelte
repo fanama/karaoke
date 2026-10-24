@@ -18,9 +18,10 @@
     snap, status, ended, toast, loadError, tab, q, results, searching, searched, stale,
     searchFailed, selected, nickname, nicknameError, adding, addError, pasteUrl, pasteError,
     pinSheet, pin, pinError, unlocking, manageOpen, confirmClear, confirmEnd, busy,
+    libraryCount, libraryBusy, libraryError,
     load, queue: queueSearch, clear: clearSearch, choose, preparePaste, submit,
     toggleVote, startSkip, castSkip, cancelSkip, removeSong, playback, moveSong, unlock,
-    toggleLock, clearQueue, endRoom, newRoom
+    toggleLock, clearQueue, loadLibrary, importLibrary, endRoom, newRoom
   } = c;
 
   let nowTick = Date.now();
@@ -128,7 +129,10 @@
         busy={$busy}
         onPlayback={playback}
         onToggleLock={toggleLock}
-        onManage={() => manageOpen.set(true)}
+        onManage={() => {
+          manageOpen.set(true);
+          loadLibrary();
+        }}
       />
     {/if}
 
@@ -149,11 +153,16 @@
       {manageOpen}
       {confirmClear}
       {confirmEnd}
+      {libraryCount}
+      {libraryBusy}
+      {libraryError}
+      {code}
       {locked}
       onSubmit={submit}
       onUnlock={unlock}
       onToggleLock={toggleLock}
       onClear={clearQueue}
+      onImportLibrary={importLibrary}
       onEnd={endRoom}
     />
   </div>

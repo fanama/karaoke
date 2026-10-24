@@ -26,6 +26,8 @@ export function createGuestActions(ctx: GuestActionContext) {
     unlock: () => actions.unlock(),
     toggleLock: () => actions.toggleLock(),
     clearQueue: () => actions.clearQueue(),
+    loadLibrary: () => actions.loadLibrary(),
+    importLibrary: (file: File) => actions.importLibrary(file),
     endRoom: () => actions.endRoom(),
     newRoom: () => actions.newRoom()
   };
@@ -104,6 +106,34 @@ class GuestActions {
       this.ctx.state.manageOpen.set(false);
     } catch (err) {
       this.ctx.session.showError(err);
+    }
+  }
+
+  async loadLibrary(): Promise<void> {
+    try {
+      const res = await this.ctx.deps.api.libraryStats(this.ctx.code);
+      this.ctx.state.libraryCount.set(res.songs);
+      this.ctx.state.libraryError.set('');
+    } catch (err) {
+      this.ctx.state.libraryCount.set(null);
+      this.ctx.state.libraryError.set(errorText(get(tr), errorCodeOf(err, 'library_disabled')));
+    }
+  }
+
+  async importLibrary(file: File): Promise<void> {
+    if (get(this.ctx.state.libraryBusy)) return;
+    this.ctx.state.libraryBusy.set(true);
+    this.ctx.state.libraryError.set('');
+    try {
+      const res = await this.ctx.deps.api.importLibrary(this.ctx.code, file);
+      this.ctx.state.libraryCount.set(res.songs);
+      this.ctx.session.showToast(
+        get(tr)('room.libraryImported', { count: res.imported, total: res.songs })
+      );
+    } catch (err) {
+      this.ctx.state.libraryError.set(errorText(get(tr), errorCodeOf(err, 'library_invalid')));
+    } finally {
+      this.ctx.state.libraryBusy.set(false);
     }
   }
 

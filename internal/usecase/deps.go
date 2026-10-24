@@ -24,6 +24,7 @@ type Deps struct {
 	Devices ports.DeviceRepository
 	Events  ports.EventPublisher
 	Catalog ports.VideoCatalog
+	Library ports.SongLibrary
 	Clock   ports.Clock
 	IDs     ports.IDGenerator
 	Cfg     ports.Config

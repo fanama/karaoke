@@ -2,6 +2,7 @@ package ports
 
 import (
 	"context"
+	"io"
 	"time"
 
 	"fana-karaoke/internal/domain"
@@ -47,6 +48,16 @@ type EventPublisher interface {
 type VideoCatalog interface {
 	Search(ctx context.Context, query string) ([]domain.SearchResult, bool, error)
 	Lookup(ctx context.Context, videoID string) (domain.VideoMeta, error)
+}
+
+// SongLibrary is the local song store searched before the upstream catalog.
+// Saving the same video twice updates it instead of creating a duplicate.
+type SongLibrary interface {
+	Search(ctx context.Context, query string, limit int) ([]domain.SearchResult, error)
+	Save(ctx context.Context, songs []domain.SearchResult) error
+	Count(ctx context.Context) (int, error)
+	Export(ctx context.Context, w io.Writer) error
+	Import(ctx context.Context, r io.Reader) (int, error)
 }
 
 // EmbedProber checks whether a video can be played in an iframe.

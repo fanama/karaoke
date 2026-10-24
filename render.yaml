@@ -19,3 +19,12 @@ services:
         generateValue: true
       - key: TRUST_PROXY
         value: "true"
+      # Enables /admin; copy the generated value from the Render dashboard.
+      - key: ADMIN_TOKEN
+        generateValue: true
+    # The song library is written to /data/library.sqlite (set in the image).
+    # Attach a disk on a paid plan so it survives deploys, then uncomment:
+    # disk:
+    #   name: library
+    #   mountPath: /data
+    #   sizeGB: 1

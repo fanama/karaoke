@@ -16,10 +16,14 @@ RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/fana-karaoke ./cmd
 
 FROM alpine:3.22
 RUN apk add --no-cache ca-certificates \
-    && adduser -D -H -u 10001 fana
+    && adduser -D -H -u 10001 fana \
+    && mkdir -p /data \
+    && chown fana:fana /data
 COPY --from=build /out/fana-karaoke /usr/local/bin/fana-karaoke
 USER fana
 ENV PORT=8080
+ENV LIBRARY_PATH=/data/library.sqlite
+VOLUME ["/data"]
 EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s CMD wget -qO- "http://127.0.0.1:${PORT:-8080}/healthz" >/dev/null || exit 1
 ENTRYPOINT ["/usr/local/bin/fana-karaoke"]

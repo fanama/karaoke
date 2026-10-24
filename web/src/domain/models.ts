@@ -97,6 +97,13 @@ export interface TVSession {
   pin: string;
 }
 
+export interface AdminSession {
+  enabled: boolean;
+  authenticated: boolean;
+  library: boolean;
+  songs: number;
+}
+
 export interface QueueSelection {
   videoId?: string;
   url?: string;

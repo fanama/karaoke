@@ -1,4 +1,5 @@
 import type {
+  AdminSession,
   CreateRoomResponse,
   PlaybackAction,
   SearchResult,
@@ -12,6 +13,8 @@ export interface RoomApiPort {
   resolveRoom(code: string): Promise<{ code: string }>;
   getRoom(code: string): Promise<Snapshot>;
   search(query: string): Promise<{ results: SearchResult[]; stale: boolean }>;
+  libraryStats(code: string): Promise<{ songs: number }>;
+  importLibrary(code: string, file: File): Promise<{ imported: number; songs: number }>;
   addSong(
     code: string,
     payload: { videoId?: string; url?: string; nickname: string }
@@ -29,4 +32,8 @@ export interface RoomApiPort {
   rotatePIN(code: string): Promise<{ pin: string }>;
   endRoom(code: string): Promise<void>;
   tvSession(): Promise<TVSession>;
+  adminSession(): Promise<AdminSession>;
+  adminLogin(token: string): Promise<AdminSession>;
+  adminLogout(): Promise<void>;
+  adminImport(file: File): Promise<{ imported: number; songs: number }>;
 }

@@ -14,6 +14,7 @@ type Config struct {
 	Dev        bool
 	BaseURL    string
 	TrustProxy bool
+	AdminToken string
 	Version    string
 }
 
@@ -29,6 +30,7 @@ type Server struct {
 	baseURL    string
 	dev        bool
 	trustProxy bool
+	adminToken string
 	log        *slog.Logger
 }
 
@@ -48,6 +50,7 @@ func New(svc ports.KaraokeService, hub *Hub, signer ports.SessionSigner, limiter
 		baseURL:    strings.TrimRight(cfg.BaseURL, "/"),
 		dev:        cfg.Dev,
 		trustProxy: cfg.TrustProxy,
+		adminToken: cfg.AdminToken,
 		log:        log,
 	}
 	s.loadIndex(static)

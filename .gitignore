@@ -1,5 +1,9 @@
 node_modules/
 fana-karaoke
+/data/
+.env
+.env.*
+!.env.example
 *.log
 .DS_Store
 web/test-results/

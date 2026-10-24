@@ -25,6 +25,9 @@ export function createGuestState() {
     manageOpen: writable(false),
     confirmClear: writable(false),
     confirmEnd: writable(false),
+    libraryCount: writable<number | null>(null),
+    libraryBusy: writable(false),
+    libraryError: writable(''),
     busy: writable(false)
   };
 }

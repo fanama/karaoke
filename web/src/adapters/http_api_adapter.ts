@@ -16,14 +16,27 @@ export class ApiError extends Error implements ApiFailure {
 }
 
 type FetchLike = typeof fetch;
+type RoomMethods = Omit<RoomApiPort, 'adminSession' | 'adminLogin' | 'adminLogout' | 'adminImport'>;
+type AdminMethods = Pick<RoomApiPort, 'adminSession' | 'adminLogin' | 'adminLogout' | 'adminImport'>;
 
 export function createApiAdapter(fetcher: FetchLike = fetch): RoomApiPort {
+  return { ...roomMethods(fetcher), ...adminMethods(fetcher) };
+}
+
+function roomMethods(fetcher: FetchLike): RoomMethods {
   return {
     config: () => request(fetcher, '/api/config'),
     createRoom: () => request(fetcher, '/api/rooms', post({})),
     resolveRoom: (code) => request(fetcher, `/api/rooms/resolve?code=${enc(code)}`),
     getRoom: (code) => request(fetcher, `/api/rooms/${enc(code)}`),
     search: (query) => request(fetcher, `/api/search?q=${enc(query)}`),
+    libraryStats: (code) => request(fetcher, `/api/rooms/${enc(code)}/library`),
+    importLibrary: (code, file) =>
+      request(fetcher, `/api/rooms/${enc(code)}/library/import`, {
+        method: 'POST',
+        body: file,
+        headers: { 'Content-Type': 'application/octet-stream' }
+      }),
     addSong: (code, payload) => request(fetcher, `/api/rooms/${enc(code)}/songs`, post(payload)),
     toggleVote: (code, entryId) =>
       request(fetcher, `/api/rooms/${enc(code)}/songs/${enc(entryId)}/vote`, post({})),
@@ -45,6 +58,20 @@ export function createApiAdapter(fetcher: FetchLike = fetch): RoomApiPort {
     rotatePIN: (code) => request(fetcher, `/api/rooms/${enc(code)}/pin/rotate`, post({})),
     endRoom: (code) => request(fetcher, `/api/rooms/${enc(code)}/end`, post({})),
     tvSession: () => request(fetcher, '/api/tv/session')
+  };
+}
+
+function adminMethods(fetcher: FetchLike): AdminMethods {
+  return {
+    adminSession: () => request(fetcher, '/api/admin/session'),
+    adminLogin: (token: string) => request(fetcher, '/api/admin/login', post({ token })),
+    adminLogout: () => request(fetcher, '/api/admin/logout', post({})),
+    adminImport: (file: File) =>
+      request(fetcher, '/api/admin/library/import', {
+        method: 'POST',
+        body: file,
+        headers: { 'Content-Type': 'application/octet-stream' }
+      })
   };
 }
 

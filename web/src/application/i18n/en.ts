@@ -1,6 +1,7 @@
 export const en: Record<string, string> = {
   'app.name': 'Fana Karaoke',
   'app.tagline': 'The room is the webpage.',
+  'app.credit': 'Created by Fanamperantsoa Rakotoasimbola',
 
   'common.createRoom': 'Start a karaoke room',
   'common.creating': 'Creating room…',
@@ -24,6 +25,26 @@ export const en: Record<string, string> = {
   'common.language': 'Language',
   'notFound.title': 'Page not found',
   'notFound.body': 'This page does not exist.',
+
+  'admin.title': 'Song library',
+  'admin.subtitle': 'Download or restore the SQLite database that search uses before YouTube.',
+  'admin.tokenLabel': 'Admin token',
+  'admin.tokenPlaceholder': 'ADMIN_TOKEN',
+  'admin.unlock': 'Open admin',
+  'admin.disabledBody':
+    'The admin page is disabled. Set the ADMIN_TOKEN environment variable and restart the server.',
+  'admin.library': 'SQLite library',
+  'admin.libraryBody':
+    'Download saves the .sqlite file. Upload merges songs into the current library without creating duplicates.',
+  'admin.count': '{count} songs saved',
+  'admin.export': 'Download .sqlite',
+  'admin.import': 'Upload .sqlite',
+  'admin.importing': 'Uploading…',
+  'admin.imported': '{count} songs imported ({total} saved)',
+  'admin.logout': 'Log out',
+  'admin.libraryDisabled':
+    'The song library is disabled on this server: LIBRARY_PATH is empty or the database could not be opened.',
+  'admin.loadError': 'Cannot reach the admin page.',
 
   'welcome.eyebrow': 'Browser karaoke, zero installs',
   'welcome.title': 'Turn any screen into a karaoke room.',
@@ -101,6 +122,14 @@ export const en: Record<string, string> = {
   'room.endConfirm': 'End this room for everyone? The queue will be lost.',
   'room.rotatePin': 'New PIN',
   'room.pinChanged': 'PIN updated',
+  'room.library': 'Song library',
+  'room.libraryBody':
+    'Songs found and played are saved here. Searches check it first, which saves the YouTube quota.',
+  'room.libraryCount': '{count} songs saved',
+  'room.libraryExport': 'Export',
+  'room.libraryImport': 'Import',
+  'room.libraryImporting': 'Importing…',
+  'room.libraryImported': '{count} songs imported ({total} saved)',
   'room.voteToSkip': 'Vote to skip',
   'room.voteYes': 'Vote yes',
   'room.votedYes': 'You voted',
@@ -212,6 +241,12 @@ export const en: Record<string, string> = {
   'error.server_full': 'The server is at capacity. Try again later.',
   'error.rate_limited': 'Too many requests. Try again shortly.',
   'error.search_unavailable': 'Search is unavailable right now. Paste a link instead.',
+  'error.library_disabled': 'The song library is disabled on this server.',
+  'error.admin_disabled': 'The admin page is disabled on this server.',
+  'error.admin_required': 'Admin access required.',
+  'error.invalid_token': 'Invalid admin token.',
+  'error.library_invalid': 'That file is not a valid song library.',
+  'error.library_too_large': 'That library file is too large.',
   'error.forbidden_origin': 'Request refused.',
   'error.generic': 'Something went wrong. Please try again.',
   'error.connection': 'Cannot reach the server. Check your connection.'

@@ -14,7 +14,9 @@ import (
 const version = "1.0.0"
 
 func main() {
+	applied, envErr := loadDotEnv(".env")
 	log := buildLogger()
+	logDotEnv(log, applied, envErr)
 	cfg := loadSettings(log)
 	warnConfig(log, cfg)
 	application := wire(cfg, log)
@@ -28,6 +30,16 @@ func main() {
 	waitForShutdown(log, cancel, server)
 }
 
+func logDotEnv(log *slog.Logger, applied int, err error) {
+	if err != nil {
+		log.Warn(".env could not be loaded", "error", err)
+		return
+	}
+	if applied > 0 {
+		log.Info(".env loaded", "variables", applied)
+	}
+}
+
 func buildLogger() *slog.Logger {
 	level := logLevel()
 	return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
@@ -39,6 +51,11 @@ func warnConfig(log *slog.Logger, cfg settings) {
 	}
 	if len(cfg.Instances) == 0 {
 		log.Warn("no Invidious instances configured; search and new songs will fall back to URL paste/oEmbed")
+	}
+	if cfg.AdminToken == "" {
+		log.Info("ADMIN_TOKEN is not set; the /admin page is disabled")
+	} else if len(cfg.AdminToken) < 16 {
+		log.Warn("ADMIN_TOKEN is short; use at least 16 random characters")
 	}
 }
 

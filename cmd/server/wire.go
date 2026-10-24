@@ -13,6 +13,7 @@ import (
 	"fana-karaoke/internal/adapters/secondary/invidious"
 	"fana-karaoke/internal/adapters/secondary/memory"
 	"fana-karaoke/internal/adapters/secondary/qrgen"
+	songdb "fana-karaoke/internal/adapters/secondary/sqlite"
 	"fana-karaoke/internal/ports"
 	"fana-karaoke/internal/usecase"
 	"fana-karaoke/web"
@@ -32,6 +33,7 @@ func wire(cfg settings, log *slog.Logger) *app {
 		Devices: repos.devices,
 		Events:  events,
 		Catalog: newCatalog(cfg),
+		Library: newLibrary(cfg, log),
 		Clock:   clock.System{},
 		IDs:     crypto.NewIDs(),
 		Cfg:     cfg.Limits,
@@ -52,6 +54,22 @@ func newRepositories() repositories {
 	return repositories{rooms: memory.NewRoomRepo(), devices: memory.NewDeviceRepo()}
 }
 
+// newLibrary opens the SQLite song store. A failure only disables the local
+// cache: search keeps working through the upstream catalog.
+func newLibrary(cfg settings, log *slog.Logger) ports.SongLibrary {
+	if cfg.LibraryPath == "" {
+		log.Warn("LIBRARY_PATH is empty; the local song library is disabled")
+		return nil
+	}
+	library, err := songdb.Open(cfg.LibraryPath)
+	if err != nil {
+		log.Warn("song library unavailable; every search will go online", "path", cfg.LibraryPath, "error", err)
+		return nil
+	}
+	log.Info("song library ready", "path", cfg.LibraryPath)
+	return library
+}
+
 func newCatalog(cfg settings) ports.VideoCatalog {
 	upstream := invidious.NewClient(invidious.Options{Instances: cfg.Instances, Region: cfg.Region})
 	prober := invidious.NewProber(&http.Client{Timeout: 6 * time.Second}, "")
@@ -64,6 +82,7 @@ func newServer(svc ports.KaraokeService, hub *httpapi.Hub, cfg settings, log *sl
 		Dev:        cfg.Dev,
 		BaseURL:    cfg.BaseURL,
 		TrustProxy: cfg.TrustProxy,
+		AdminToken: cfg.AdminToken,
 		Version:    version,
 	}, log)
 }

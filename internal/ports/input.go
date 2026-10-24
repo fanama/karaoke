@@ -2,6 +2,7 @@ package ports
 
 import (
 	"context"
+	"io"
 
 	"fana-karaoke/internal/domain"
 )
@@ -51,6 +52,13 @@ type CatalogQueries interface {
 	Search(ctx context.Context, query string) ([]domain.SearchResult, bool, error)
 }
 
+// LibraryCommands inspects, exports and merges the local song library.
+type LibraryCommands interface {
+	LibraryStats(ctx context.Context) (int, error)
+	ExportLibrary(ctx context.Context, w io.Writer) error
+	ImportLibrary(ctx context.Context, r io.Reader) (int, error)
+}
+
 // KaraokeService is the single facade the primary adapters depend on.
 type KaraokeService interface {
 	RoomCommands
@@ -58,4 +66,5 @@ type KaraokeService interface {
 	PlaybackCommands
 	VoteCommands
 	CatalogQueries
+	LibraryCommands
 }

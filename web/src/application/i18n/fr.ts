@@ -1,6 +1,7 @@
 export const fr: Record<string, string> = {
   'app.name': 'Fana Karaoké',
   'app.tagline': 'La salle, c’est la page web.',
+  'app.credit': 'Créé par Fanamperantsoa Rakotoasimbola',
 
   'common.createRoom': 'Créer une salle de karaoké',
   'common.creating': 'Création de la salle…',
@@ -24,6 +25,27 @@ export const fr: Record<string, string> = {
   'common.language': 'Langue',
   'notFound.title': 'Page introuvable',
   'notFound.body': 'Cette page n’existe pas.',
+
+  'admin.title': 'Bibliothèque',
+  'admin.subtitle':
+    'Téléchargez ou restaurez la base SQLite utilisée par la recherche avant YouTube.',
+  'admin.tokenLabel': 'Jeton administrateur',
+  'admin.tokenPlaceholder': 'ADMIN_TOKEN',
+  'admin.unlock': 'Ouvrir l’admin',
+  'admin.disabledBody':
+    'La page admin est désactivée. Définissez la variable ADMIN_TOKEN puis redémarrez le serveur.',
+  'admin.library': 'Bibliothèque SQLite',
+  'admin.libraryBody':
+    'Le téléchargement enregistre le fichier .sqlite. Le chargement fusionne les chansons dans la bibliothèque actuelle sans créer de doublons.',
+  'admin.count': '{count} chansons enregistrées',
+  'admin.export': 'Télécharger .sqlite',
+  'admin.import': 'Charger .sqlite',
+  'admin.importing': 'Chargement…',
+  'admin.imported': '{count} chansons importées ({total} au total)',
+  'admin.logout': 'Se déconnecter',
+  'admin.libraryDisabled':
+    'La bibliothèque est désactivée sur ce serveur : LIBRARY_PATH est vide ou la base n’a pas pu être ouverte.',
+  'admin.loadError': 'Impossible de joindre la page admin.',
 
   'welcome.eyebrow': 'Le karaoké dans le navigateur, sans installation',
   'welcome.title': 'Transformez n’importe quel écran en salle de karaoké.',
@@ -101,6 +123,14 @@ export const fr: Record<string, string> = {
   'room.endConfirm': 'Terminer cette salle pour tout le monde ? La file sera perdue.',
   'room.rotatePin': 'Nouveau PIN',
   'room.pinChanged': 'PIN mis à jour',
+  'room.library': 'Bibliothèque',
+  'room.libraryBody':
+    'Les chansons trouvées et jouées sont enregistrées ici. La recherche la consulte en premier, ce qui économise le quota YouTube.',
+  'room.libraryCount': '{count} chansons enregistrées',
+  'room.libraryExport': 'Extraire',
+  'room.libraryImport': 'Importer',
+  'room.libraryImporting': 'Import…',
+  'room.libraryImported': '{count} chansons importées ({total} au total)',
   'room.voteToSkip': 'Voter pour passer',
   'room.voteYes': 'Voter oui',
   'room.votedYes': 'Vote enregistré',
@@ -212,6 +242,12 @@ export const fr: Record<string, string> = {
   'error.server_full': 'Le serveur est saturé. Réessayez plus tard.',
   'error.rate_limited': 'Trop de requêtes. Réessayez dans un instant.',
   'error.search_unavailable': 'La recherche est indisponible. Collez un lien à la place.',
+  'error.library_disabled': 'La bibliothèque de chansons est désactivée sur ce serveur.',
+  'error.admin_disabled': 'La page admin est désactivée sur ce serveur.',
+  'error.admin_required': 'Accès administrateur requis.',
+  'error.invalid_token': 'Jeton administrateur invalide.',
+  'error.library_invalid': 'Ce fichier n’est pas une bibliothèque valide.',
+  'error.library_too_large': 'Ce fichier de bibliothèque est trop volumineux.',
   'error.forbidden_origin': 'Requête refusée.',
   'error.generic': 'Une erreur est survenue. Réessayez.',
   'error.connection': 'Impossible de joindre le serveur. Vérifiez votre connexion.'

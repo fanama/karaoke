@@ -10,7 +10,7 @@ import (
 func (s *Server) handleSPA(w http.ResponseWriter, r *http.Request) {
 	p := r.URL.Path
 	switch {
-	case p == "/":
+	case p == "/", p == "/admin":
 		s.writeIndex(w)
 	case strings.HasPrefix(p, "/r/") && singleSegment(p):
 		s.ensureDevice(w, r)

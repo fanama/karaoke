@@ -4,6 +4,7 @@
   import { getAppContext } from '../../ports/context';
   import LanguageToggle from '../common/LanguageToggle.svelte';
   import WelcomeFeatures from './WelcomeFeatures.svelte';
+  import WelcomeFooter from './WelcomeFooter.svelte';
   import WelcomeStagePreview from './WelcomeStagePreview.svelte';
 
   const { creating, createError, code, joinError, joining, createRoom, joinRoom } =
@@ -83,10 +84,7 @@
     <WelcomeFeatures />
   </main>
 
-  <footer>
-    <span>Fana Karaoke</span>
-    <span class="dim">{$tr('app.tagline')}</span>
-  </footer>
+  <WelcomeFooter />
 </div>
 
 <style>
@@ -124,8 +122,7 @@
   }
 
   .topbar,
-  main,
-  footer {
+  main {
     position: relative;
     z-index: 1;
     max-width: 1180px;
@@ -239,16 +236,6 @@
     flex: 1;
   }
 
-  footer {
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1.5rem 0;
-    border-top: 1px solid var(--border);
-    color: var(--muted);
-    font-size: 0.8rem;
-  }
-
   @media (max-width: 900px) {
     .hero {
       grid-template-columns: 1fr;
@@ -267,9 +254,6 @@
     }
     .join-row .btn {
       width: 100%;
-    }
-    footer {
-      flex-direction: column;
     }
   }
 </style>

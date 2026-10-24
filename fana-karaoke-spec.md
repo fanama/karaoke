@@ -15,7 +15,7 @@ Fana Karaoke is a web app inspired by [Syng.Rocks](https://syng.rocks/) and its 
 - **TV view** — the room. Big YouTube player, room code, QR code, now playing, up-next, skip-vote status, and host controls.
 - **Guest view** — a phone-first page reached by scanning the TV's QR code. Search, add songs, vote songs up, start/participate in a skip vote, and (with the PIN) use host controls.
 
-There is no desktop client, no account, no database, and no saved library. Rooms live in memory and disappear when the host ends them, when they are abandoned for two hours, or when the server restarts.
+There is no desktop client and no account. Rooms live in memory and disappear when the host ends them, when they are abandoned for two hours, or when the server restarts. A local SQLite **song library** (metadata only) remembers search hits and played songs so repeat queries avoid the upstream quota; it can be exported and imported by the host.
 
 The product is bilingual (English and French), designed for a public HTTPS deployment, and built as a single Go binary serving an embedded Svelte frontend over HTTP and WebSocket.
 
@@ -66,7 +66,7 @@ The current `/Users/frakotoasimbola/project/karaoke` directory is empty. This do
 - Lyrics overlay, pitch scoring, vocal removal / stem separation, audio recording.
 - Downloading YouTube media, extracting audio, or proxying video streams through the server. Playback is embedding only.
 - User accounts, login, profiles, payments, subscriptions, analytics, or AI content moderation.
-- Saved/reusable playlists, persistent play history, favorites, or a song library.
+- Personal playlists, favorites, per-user play history, or accounts. The song library is server-wide metadata, not a user library.
 - Native mobile/desktop apps, offline mode, Chromecast/AirPlay integration.
 - Multi-instance / horizontally scaled deployment. Room state is process-local.
 - Public room directory or “browse rooms”. Rooms are reached by code or QR.
@@ -1036,7 +1036,7 @@ Multi-stage Dockerfile:
 2. `golang:1.26-alpine`: copy source + `web/dist`, `CGO_ENABLED=0 go build -trimpath -ldflags="-s -w"`.
 3. `alpine:3.22` (or distroless): non-root user, copy one binary, expose `8080`, `HEALTHCHECK` on `/healthz`.
 4. Runtime env: `PUBLIC_BASE_URL`, `INVIDIOUS_INSTANCES`, `SESSION_SECRET`; optional `MAX_ROOMS`, etc.
-5. No database volume; nothing persists. Document that restarting loses rooms.
+5. The song library is the only persistent file (`/data/library.sqlite`). Document that restarting loses rooms but keeps the library.
 
 ### 17.4 Reverse proxy requirements
 
@@ -1080,7 +1080,7 @@ These do not block starting; decide during implementation or with the user.
 8. **Search region/language.** Default region FR; some karaoke catalogs are region-sensitive. Make `YOUTUBE_REGION` configurable and revisit after testing.
 9. **Queue fairness.** Votes can let one table dominate. Host manual ordering and the 100-song cap are the current mitigations; a round-robin mode is out of scope.
 10. **Multiple TVs echo.** Accepted. If it becomes a real problem, add a “mute this TV” local toggle (not a server feature).
-11. **Persistent rooms.** In-memory means a restart clears the party. Accepted; document clearly. If needed later, an optional SQLite adapter can be added behind `RoomRepository` without touching the domain.
+11. **Persistent rooms.** In-memory means a restart clears the party. Accepted; document clearly. If needed later, a room adapter can be added behind `RoomRepository` without touching the domain. The SQLite library only stores songs.
 12. **No lyrics overlay.** YouTube karaoke videos include lyrics; if a user adds an original track, there are no lyrics. The UI can warn in the add sheet (copy TBD) but does not analyze content.
 13. **HTTPS on LAN.** Phone camera QR scanning and secure cookies generally require HTTPS or localhost. For a LAN party on `http://192.168.x.x`, Secure cookies would break; `DEV=true` or a local TLS certificate is required. Document this deployment caveat. Public deployment assumes HTTPS.
 

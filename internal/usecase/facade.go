@@ -37,7 +37,8 @@ type CatalogService struct {
 // NewCatalogService builds the catalog use case.
 func NewCatalogService(d Deps) *CatalogService { return &CatalogService{Deps: d} }
 
-// Search returns karaoke results, ignoring queries that are too short.
+// Search answers from the local library first, then falls back online. Online
+// hits are remembered so later searches do not spend the upstream quota.
 func (s *CatalogService) Search(ctx context.Context, query string) ([]domain.SearchResult, bool, error) {
 	query = strings.TrimSpace(query)
 	if len([]rune(query)) < 2 {
@@ -46,6 +47,9 @@ func (s *CatalogService) Search(ctx context.Context, query string) ([]domain.Sea
 	if s.Catalog == nil {
 		return nil, false, domain.ErrSearchFailed
 	}
+	if local := s.localSearch(ctx, query); len(local) > 0 {
+		return local, false, nil
+	}
 	results, stale, err := s.Catalog.Search(ctx, query)
 	if err != nil {
 		return nil, false, err
@@ -53,5 +57,24 @@ func (s *CatalogService) Search(ctx context.Context, query string) ([]domain.Sea
 	if results == nil {
 		results = []domain.SearchResult{}
 	}
+	s.remember(ctx, results)
 	return results, stale, nil
+}
+
+func (s *CatalogService) localSearch(ctx context.Context, query string) []domain.SearchResult {
+	if s.Library == nil {
+		return nil
+	}
+	results, err := s.Library.Search(ctx, query, 20)
+	if err != nil {
+		return nil
+	}
+	return results
+}
+
+func (s *CatalogService) remember(ctx context.Context, results []domain.SearchResult) {
+	if s.Library == nil || len(results) == 0 {
+		return
+	}
+	_ = s.Library.Save(ctx, results)
 }
