@@ -94,6 +94,8 @@ export const en: Record<string, string> = {
   'room.tabQueue': 'Queue',
   'room.searchPlaceholder': 'Song, artist…',
   'room.searchHint': 'Search for a song and pick a karaoke version.',
+  'room.suggestionsTitle': 'Suggested songs',
+  'room.shuffle': 'Shuffle',
   'room.searching': 'Searching…',
   'room.noResults': 'No karaoke videos found. Try another title or paste a link.',
   'room.searchError': 'Search is unavailable right now. Paste a YouTube link instead.',

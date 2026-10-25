@@ -21,6 +21,7 @@ export function createGuestController(code: string, deps: AppDependencies) {
   const actions = createGuestActions(ctx);
 
   async function load(): Promise<void> {
+    void search.shuffle();
     try {
       session.apply(await deps.api.getRoom(code));
       session.connect();

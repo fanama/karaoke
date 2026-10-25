@@ -95,6 +95,8 @@ export const fr: Record<string, string> = {
   'room.tabQueue': 'File',
   'room.searchPlaceholder': 'Chanson, artiste…',
   'room.searchHint': 'Cherchez une chanson et choisissez une version karaoké.',
+  'room.suggestionsTitle': 'Suggestions de chansons',
+  'room.shuffle': 'Mélanger',
   'room.searching': 'Recherche…',
   'room.noResults': 'Aucune vidéo karaoké trouvée. Essayez un autre titre ou collez un lien.',
   'room.searchError': 'La recherche est indisponible. Collez un lien YouTube à la place.',

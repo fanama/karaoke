@@ -62,6 +62,21 @@ func (s *QueueService) checkAdmission(code string) error {
 }
 
 func (s *QueueService) lookup(ctx context.Context, videoID string) (domain.VideoMeta, error) {
+	meta, err := s.resolveMeta(ctx, videoID)
+	if err != nil {
+		return domain.VideoMeta{}, err
+	}
+	if err := s.rememberSong(ctx, meta); err != nil {
+		return domain.VideoMeta{}, err
+	}
+	return meta, nil
+}
+
+// resolveMeta answers from the library when it can, and only then goes online.
+func (s *QueueService) resolveMeta(ctx context.Context, videoID string) (domain.VideoMeta, error) {
+	if meta, ok := s.localMeta(ctx, videoID); ok {
+		return meta, nil
+	}
 	if s.Catalog == nil {
 		return domain.VideoMeta{}, domain.ErrSearchFailed
 	}
@@ -75,10 +90,22 @@ func (s *QueueService) lookup(ctx context.Context, videoID string) (domain.Video
 	if meta.ThumbnailURL == "" {
 		meta.ThumbnailURL = domain.ThumbnailURL(meta.VideoID)
 	}
-	if err := s.rememberSong(ctx, meta); err != nil {
-		return domain.VideoMeta{}, err
-	}
 	return meta, nil
+}
+
+// localMeta returns remembered metadata that still satisfies the room rules.
+func (s *QueueService) localMeta(ctx context.Context, videoID string) (domain.VideoMeta, bool) {
+	if s.Library == nil {
+		return domain.VideoMeta{}, false
+	}
+	meta, ok := s.Library.Lookup(ctx, videoID)
+	if !ok || domain.ValidateVideoMeta(meta) != nil {
+		return domain.VideoMeta{}, false
+	}
+	if meta.ThumbnailURL == "" {
+		meta.ThumbnailURL = domain.ThumbnailURL(meta.VideoID)
+	}
+	return meta, true
 }
 
 // rememberSong keeps every played or pasted song in the local library.

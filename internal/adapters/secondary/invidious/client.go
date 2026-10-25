@@ -14,26 +14,35 @@ import (
 	"fana-karaoke/internal/domain"
 )
 
+// DefaultYouTubeSearch is the public search page the scraper reads.
+const DefaultYouTubeSearch = "https://www.youtube.com/results"
+
 // Options configures the upstream client.
 type Options struct {
-	Instances []string
-	Region    string
+	Instances  []string
+	Region     string
+	YouTubeURL string // overrides the YouTube search page; tests only
 }
 
 // Client queries public Invidious instances for search and metadata.
 type Client struct {
-	instances []string
-	region    string
-	http      *http.Client
-	mu        sync.Mutex
-	unhealthy map[string]time.Time
-	now       func() time.Time
+	instances  []string
+	youtubeURL string
+	region     string
+	http       *http.Client
+	mu         sync.Mutex
+	unhealthy  map[string]time.Time
+	now        func() time.Time
 }
 
 // NewClient builds the client and normalises the instance list.
 func NewClient(opts Options) *Client {
 	if opts.Region == "" {
 		opts.Region = "FR"
+	}
+	youtubeURL := strings.TrimSpace(opts.YouTubeURL)
+	if youtubeURL == "" {
+		youtubeURL = DefaultYouTubeSearch
 	}
 	instances := make([]string, 0, len(opts.Instances))
 	for _, in := range opts.Instances {
@@ -42,19 +51,29 @@ func NewClient(opts Options) *Client {
 		}
 	}
 	return &Client{
-		instances: instances,
-		region:    opts.Region,
-		http:      &http.Client{Timeout: 5 * time.Second},
-		unhealthy: map[string]time.Time{},
-		now:       time.Now,
+		instances:  instances,
+		youtubeURL: youtubeURL,
+		region:     opts.Region,
+		http:       &http.Client{Timeout: 5 * time.Second},
+		unhealthy:  map[string]time.Time{},
+		now:        time.Now,
 	}
 }
 
 // SetClock lets tests control the circuit-breaker window.
 func (c *Client) SetClock(now func() time.Time) { c.now = now }
 
-// Search returns at most twenty karaoke hits from the first healthy instance.
+// Search returns at most twenty karaoke hits. YouTube's own search page is tried
+// first because it needs no API key; the instance pool is the fallback.
 func (c *Client) Search(ctx context.Context, query string) ([]domain.SearchResult, error) {
+	if results, err := c.searchYouTube(ctx, query); err == nil && len(results) > 0 {
+		return results, nil
+	}
+	return c.searchInvidious(ctx, query)
+}
+
+// searchInvidious queries the first healthy public instance.
+func (c *Client) searchInvidious(ctx context.Context, query string) ([]domain.SearchResult, error) {
 	for _, base := range c.pickInstances(4) {
 		target := fmt.Sprintf("%s/api/v1/search?q=%s&type=video&region=%s&page=1",
 			base, url.QueryEscape(query), url.QueryEscape(c.region))

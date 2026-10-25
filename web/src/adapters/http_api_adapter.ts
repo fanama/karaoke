@@ -30,6 +30,7 @@ function roomMethods(fetcher: FetchLike): RoomMethods {
     resolveRoom: (code) => request(fetcher, `/api/rooms/resolve?code=${enc(code)}`),
     getRoom: (code) => request(fetcher, `/api/rooms/${enc(code)}`),
     search: (query) => request(fetcher, `/api/search?q=${enc(query)}`),
+    randomSongs: (limit = 6) => request(fetcher, `/api/songs/random?limit=${limit}`),
     libraryStats: (code) => request(fetcher, `/api/rooms/${enc(code)}/library`),
     importLibrary: (code, file) =>
       request(fetcher, `/api/rooms/${enc(code)}/library/import`, {

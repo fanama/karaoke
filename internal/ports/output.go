@@ -74,6 +74,10 @@ type LibraryStatus struct {
 // Saving the same video twice updates it instead of creating a duplicate.
 type SongLibrary interface {
 	Search(ctx context.Context, query string, limit int) ([]domain.SearchResult, error)
+	// Random samples up to limit songs so the guest screen can suggest tracks.
+	Random(ctx context.Context, limit int) ([]domain.SearchResult, error)
+	// Lookup returns stored metadata so queueing never needs the network.
+	Lookup(ctx context.Context, videoID string) (domain.VideoMeta, bool)
 	// Cache updates memory immediately and writes durably best-effort.
 	Cache(ctx context.Context, songs []domain.SearchResult) error
 	// Save waits for durable storage; the cache is unchanged on failure.

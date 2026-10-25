@@ -9,6 +9,8 @@ export function createGuestState() {
     results: writable<SearchResult[]>([]),
     searching: writable(false),
     searched: writable(false),
+    suggestions: writable<SearchResult[]>([]),
+    loadingSuggestions: writable(false),
     stale: writable(false),
     searchFailed: writable(false),
     selected: writable<QueueSelection | null>(null),

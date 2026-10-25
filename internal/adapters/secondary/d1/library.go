@@ -112,6 +112,16 @@ func (l *Library) Search(_ context.Context, query string, limit int) ([]domain.S
 	return l.cache.search(query, limit), nil
 }
 
+// Random samples the warm cache without touching D1.
+func (l *Library) Random(_ context.Context, limit int) ([]domain.SearchResult, error) {
+	return l.cache.random(limit), nil
+}
+
+// Lookup answers from the warm cache so queueing stays offline.
+func (l *Library) Lookup(_ context.Context, videoID string) (domain.VideoMeta, bool) {
+	return l.cache.lookup(videoID)
+}
+
 // Count returns the number of cached songs.
 func (l *Library) Count(context.Context) (int, error) { return l.cache.count(), nil }
 

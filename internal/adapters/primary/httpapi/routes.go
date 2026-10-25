@@ -11,6 +11,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/rooms/{code}", s.handleSnapshot)
 	mux.HandleFunc("GET /api/rooms/{code}/qr.svg", s.handleQR)
 	mux.HandleFunc("GET /api/search", s.handleSearch)
+	mux.HandleFunc("GET /api/songs/random", s.handleRandomSongs)
 	mux.HandleFunc("GET /api/rooms/{code}/library", s.handleLibraryStats)
 	mux.HandleFunc("GET /api/rooms/{code}/library/export", s.handleLibraryExport)
 	mux.HandleFunc("POST /api/rooms/{code}/library/import", s.handleLibraryImport)

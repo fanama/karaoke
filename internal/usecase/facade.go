@@ -7,6 +7,12 @@ import (
 	"fana-karaoke/internal/domain"
 )
 
+// DefaultRandomLimit is how many suggestions the guest search screen shows.
+const DefaultRandomLimit = 6
+
+// MaxRandomLimit caps how many suggestions one request may ask for.
+const MaxRandomLimit = 20
+
 // Facade is the single driving port for HTTP and WebSocket adapters.
 type Facade struct {
 	*RoomService
@@ -59,6 +65,25 @@ func (s *CatalogService) Search(ctx context.Context, query string) ([]domain.Sea
 	}
 	s.cacheResults(ctx, results)
 	return results, stale, nil
+}
+
+// RandomSongs samples the local library for the guest search suggestions.
+// A disabled or broken library yields an empty list, never an error.
+func (s *CatalogService) RandomSongs(ctx context.Context, limit int) ([]domain.SearchResult, error) {
+	if s.Library == nil {
+		return []domain.SearchResult{}, nil
+	}
+	if limit <= 0 {
+		limit = DefaultRandomLimit
+	}
+	if limit > MaxRandomLimit {
+		limit = MaxRandomLimit
+	}
+	songs, err := s.Library.Random(ctx, limit)
+	if err != nil || songs == nil {
+		return []domain.SearchResult{}, nil
+	}
+	return songs, nil
 }
 
 func (s *CatalogService) localSearch(ctx context.Context, query string) []domain.SearchResult {

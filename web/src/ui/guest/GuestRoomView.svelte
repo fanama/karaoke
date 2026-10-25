@@ -16,10 +16,12 @@
   const c = createGuestController(code, getAppContext());
   const {
     snap, status, ended, toast, loadError, tab, q, results, searching, searched, stale,
+    suggestions, loadingSuggestions,
     searchFailed, selected, nickname, nicknameError, adding, addError, pasteUrl, pasteError,
     pinSheet, pin, pinError, unlocking, manageOpen, confirmClear, confirmEnd, busy,
     libraryCount, libraryBusy, libraryError,
-    load, queue: queueSearch, clear: clearSearch, choose, preparePaste, submit,
+    load, queue: queueSearch, clear: clearSearch, shuffle: shuffleSuggestions, choose,
+    preparePaste, submit,
     toggleVote, startSkip, castSkip, cancelSkip, removeSong, playback, moveSong, unlock,
     toggleLock, clearQueue, loadLibrary, importLibrary, endRoom, newRoom
   } = c;
@@ -86,6 +88,8 @@
         <GuestSearchTab
           {q}
           {results}
+          {suggestions}
+          {loadingSuggestions}
           {searching}
           {searched}
           {stale}
@@ -97,6 +101,7 @@
           onSearch={queueSearch}
           onClear={clearSearch}
           onChoose={choose}
+          onShuffle={shuffleSuggestions}
           onPaste={preparePaste}
         />
       {:else}

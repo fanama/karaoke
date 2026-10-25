@@ -3,9 +3,12 @@
   import { tr } from '../../application/i18n';
   import { formatDuration } from '../../domain/playback';
   import type { SearchResult } from '../../domain/models';
+  import GuestVignettes from './GuestVignettes.svelte';
 
   export let q: Writable<string>;
   export let results: Writable<SearchResult[]>;
+  export let suggestions: Writable<SearchResult[]>;
+  export let loadingSuggestions: Writable<boolean>;
   export let searching: Writable<boolean>;
   export let searched: Writable<boolean>;
   export let stale: Writable<boolean>;
@@ -17,6 +20,7 @@
   export let onSearch: () => void;
   export let onClear: () => void;
   export let onChoose: (result: SearchResult) => void;
+  export let onShuffle: () => void;
   export let onPaste: () => void;
 </script>
 
@@ -72,11 +76,14 @@
       {/each}
     </ul>
   {:else}
-    <div class="search-intro">
-      <div class="mic-orb" aria-hidden="true">🎤</div>
-      <p>{$tr('room.searchHint')}</p>
-      <p class="tiny dim">{$tr('room.searchMin')}</p>
-    </div>
+    <GuestVignettes
+      {suggestions}
+      {loadingSuggestions}
+      {locked}
+      {full}
+      onChoose={onChoose}
+      onShuffle={onShuffle}
+    />
   {/if}
 
   <form class="paste-card card" on:submit|preventDefault={onPaste}>
@@ -222,34 +229,6 @@
     max-width: 34ch;
     line-height: 1.5;
     font-size: 0.9rem;
-  }
-
-  .search-intro {
-    display: grid;
-    justify-items: center;
-    gap: 0.6rem;
-    text-align: center;
-    padding: 2.4rem 1rem;
-    color: var(--muted);
-  }
-
-  .search-intro p {
-    max-width: 36ch;
-    line-height: 1.5;
-    font-size: 0.92rem;
-  }
-
-  .mic-orb {
-    display: grid;
-    place-items: center;
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, rgb(255 45 149 / 0.35), rgb(139 92 246 / 0.12));
-    border: 1px solid var(--border-bright);
-    box-shadow: 0 0 40px rgb(255 45 149 / 0.18);
-    font-size: 1.8rem;
-    margin-bottom: 0.3rem;
   }
 
   .paste-card {

@@ -16,7 +16,7 @@ import (
 
 func newTestCatalog(t *testing.T, serverURL string, now *time.Time) *Catalog {
 	t.Helper()
-	upstream := NewClient(Options{Instances: []string{serverURL}})
+	upstream := NewClient(Options{Instances: []string{serverURL}, YouTubeURL: serverURL + "/yt/results"})
 	prober := NewProber(&http.Client{Timeout: time.Second}, serverURL+"/oembed")
 	cache := NewCache(time.Second, time.Hour, 7*24*time.Hour, func() time.Time { return *now })
 	return NewCatalog(upstream, prober, cache)

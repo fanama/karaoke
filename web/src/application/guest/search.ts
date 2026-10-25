@@ -13,6 +13,7 @@ export function createGuestSearch(state: GuestState, deps: AppDependencies, sess
     queue: () => actions.queue(),
     run: () => actions.run(),
     clear: () => actions.clear(),
+    shuffle: () => actions.loadSuggestions(),
     choose: (result: SearchResult) => actions.choose(result),
     preparePaste: () => actions.preparePaste(),
     submit: () => actions.submit()
@@ -54,6 +55,21 @@ class GuestSearch {
       this.state.searchFailed.set(true);
     } finally {
       if (current === this.seq) this.state.searching.set(false);
+    }
+  }
+
+  // loadSuggestions samples the library for the default song vignettes.
+  async loadSuggestions(): Promise<void> {
+    if (get(this.state.loadingSuggestions)) return;
+    this.state.loadingSuggestions.set(true);
+    try {
+      const res = await this.deps.api.randomSongs(6);
+      this.state.suggestions.set(res.results ?? []);
+    } catch {
+      // A missing library is not an error: the intro state stays visible.
+      this.state.suggestions.set([]);
+    } finally {
+      this.state.loadingSuggestions.set(false);
     }
   }
 

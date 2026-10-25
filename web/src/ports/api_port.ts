@@ -13,6 +13,7 @@ export interface RoomApiPort {
   resolveRoom(code: string): Promise<{ code: string }>;
   getRoom(code: string): Promise<Snapshot>;
   search(query: string): Promise<{ results: SearchResult[]; stale: boolean }>;
+  randomSongs(limit?: number): Promise<{ results: SearchResult[] }>;
   libraryStats(code: string): Promise<{ songs: number }>;
   importLibrary(code: string, file: File): Promise<{ imported: number; songs: number }>;
   addSong(

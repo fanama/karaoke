@@ -31,6 +31,29 @@ func (f *fakeLibrary) Search(context.Context, string, int) ([]domain.SearchResul
 	return append([]domain.SearchResult(nil), f.songs...), nil
 }
 
+func (f *fakeLibrary) Random(_ context.Context, limit int) ([]domain.SearchResult, error) {
+	if f.readErr != nil {
+		return nil, f.readErr
+	}
+	if limit <= 0 || limit > len(f.songs) {
+		limit = len(f.songs)
+	}
+	return append([]domain.SearchResult(nil), f.songs[:limit]...), nil
+}
+
+func (f *fakeLibrary) Lookup(_ context.Context, videoID string) (domain.VideoMeta, bool) {
+	for _, song := range f.songs {
+		if song.VideoID != videoID {
+			continue
+		}
+		return domain.VideoMeta{
+			VideoID: song.VideoID, Title: song.Title, Channel: song.Channel,
+			ThumbnailURL: song.ThumbnailURL, DurationSeconds: song.DurationSeconds,
+		}, true
+	}
+	return domain.VideoMeta{}, false
+}
+
 func (f *fakeLibrary) Save(_ context.Context, songs []domain.SearchResult) error {
 	if f.saveErr != nil {
 		return f.saveErr
@@ -60,6 +83,17 @@ func (f *fakeLibrary) Import(context.Context, ports.LibraryFormat, io.Reader) (i
 	return 0, nil
 }
 
+type failingCatalog struct{ lookups int }
+
+func (f *failingCatalog) Search(context.Context, string) ([]domain.SearchResult, bool, error) {
+	return nil, false, domain.ErrSearchFailed
+}
+
+func (f *failingCatalog) Lookup(context.Context, string) (domain.VideoMeta, error) {
+	f.lookups++
+	return domain.VideoMeta{}, domain.ErrVideoMissing
+}
+
 type countingCatalog struct {
 	results []domain.SearchResult
 	hits    int
@@ -72,6 +106,56 @@ func (c *countingCatalog) Search(context.Context, string) ([]domain.SearchResult
 
 func (c *countingCatalog) Lookup(context.Context, string) (domain.VideoMeta, error) {
 	return domain.VideoMeta{}, domain.ErrVideoMissing
+}
+
+func TestRandomSongsSamplesLibrary(t *testing.T) {
+	lib := &fakeLibrary{songs: []domain.SearchResult{
+		{VideoID: "aaaaaaaaaaa", Title: "First"},
+		{VideoID: "bbbbbbbbbbb", Title: "Second"},
+	}}
+	service := &CatalogService{Deps: Deps{Library: lib}}
+	results, err := service.RandomSongs(context.Background(), 6)
+	if err != nil || len(results) != 2 {
+		t.Fatalf("random songs = %+v err=%v", results, err)
+	}
+	if results, err := service.RandomSongs(context.Background(), 0); err != nil || len(results) != 2 {
+		t.Fatalf("default limit = %+v err=%v", results, err)
+	}
+}
+
+func TestRandomSongsWithoutLibraryIsEmpty(t *testing.T) {
+	service := &CatalogService{Deps: Deps{}}
+	results, err := service.RandomSongs(context.Background(), 6)
+	if err != nil || results == nil || len(results) != 0 {
+		t.Fatalf("disabled library = %+v err=%v", results, err)
+	}
+	broken := &CatalogService{Deps: Deps{Library: &fakeLibrary{readErr: io.ErrUnexpectedEOF}}}
+	if results, err := broken.RandomSongs(context.Background(), 6); err != nil || len(results) != 0 {
+		t.Fatalf("broken library = %+v err=%v", results, err)
+	}
+}
+
+func TestAddSongUsesLibraryMetadataWithoutUpstream(t *testing.T) {
+	lib := &fakeLibrary{songs: []domain.SearchResult{
+		{VideoID: "aaaaaaaaaaa", Title: "Known song", Channel: "Karaoke", DurationSeconds: 200},
+	}}
+	catalog := &failingCatalog{}
+	f := NewFacade(Deps{
+		Rooms: memory.NewRoomRepo(), Devices: memory.NewDeviceRepo(), Events: noopPublisher{},
+		Catalog: catalog, Library: lib, Clock: clock.NewFake(time.Now()), IDs: crypto.NewIDs(),
+		Cfg: ports.Config{MaxRooms: 10, MaxGuests: 25, MaxQueue: 100, RoomTTL: time.Hour},
+	})
+	code := mustRoom(t, f)
+	snap, err := f.AddSong(context.Background(), code, "dev-a", "guest", "Alex", "aaaaaaaaaaa", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if snap.NowPlaying == nil || snap.NowPlaying.Title != "Known song" || snap.NowPlaying.Channel != "Karaoke" {
+		t.Fatalf("now playing = %+v", snap.NowPlaying)
+	}
+	if catalog.lookups != 0 {
+		t.Fatalf("library hit still used the upstream catalog: %d", catalog.lookups)
+	}
 }
 
 func TestSearchUsesLibraryBeforeUpstream(t *testing.T) {

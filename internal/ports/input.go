@@ -47,9 +47,10 @@ type VoteCommands interface {
 	CancelSkipVote(code, role, deviceID string) (*domain.Snapshot, error)
 }
 
-// CatalogQueries searches YouTube karaoke tracks.
+// CatalogQueries searches YouTube karaoke tracks and samples suggestions.
 type CatalogQueries interface {
 	Search(ctx context.Context, query string) ([]domain.SearchResult, bool, error)
+	RandomSongs(ctx context.Context, limit int) ([]domain.SearchResult, error)
 }
 
 // LibraryCommands inspects, exports and merges the local song library.
