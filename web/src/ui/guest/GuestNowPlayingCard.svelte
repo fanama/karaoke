@@ -96,10 +96,9 @@
 <style>
   .now-card {
     display: grid;
-    gap: var(--space-2);
-    padding: var(--space-4);
-    border: 1px solid var(--border);
-    border-top: 2px solid var(--accent);
+    gap: var(--space-3);
+    padding: var(--space-5);
+    background: var(--surface);
   }
 
   .now-head {
@@ -155,10 +154,9 @@
 
   .vote-live {
     display: grid;
-    gap: var(--space-2);
-    padding: var(--space-3);
-    border: 1px solid var(--border);
-    border-left: 2px solid var(--accent);
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background: var(--surface-2);
   }
 
   .vote-live strong {
@@ -182,9 +180,9 @@
   .empty-queue {
     display: grid;
     justify-items: center;
-    gap: var(--space-2);
-    padding: var(--space-6) var(--space-4);
-    border: 1px solid var(--border);
+    gap: var(--space-3);
+    padding: var(--space-7) var(--space-4);
+    background: var(--surface);
     color: var(--muted);
     text-align: center;
   }
@@ -201,7 +199,6 @@
     width: 56px;
     height: 56px;
     margin-bottom: var(--space-1);
-    border: 1px solid var(--accent);
     color: var(--accent);
   }
 </style>

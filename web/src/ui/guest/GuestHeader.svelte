@@ -79,9 +79,8 @@
     position: sticky;
     top: 0;
     z-index: 30;
-    padding: var(--space-3) var(--space-4) 0;
+    padding: var(--space-4);
     background: var(--bg);
-    border-bottom: 1px solid var(--border);
   }
 
   .topline {
@@ -121,7 +120,7 @@
     align-items: flex-end;
     justify-content: space-between;
     gap: var(--space-4);
-    margin-bottom: var(--space-3);
+    margin-bottom: var(--space-4);
   }
 
   .room-code {
@@ -154,7 +153,7 @@
     gap: var(--space-1);
     min-height: 44px;
     border: 0;
-    border-bottom: 2px solid transparent;
+    border-radius: var(--radius-sm);
     background: transparent;
     color: var(--dim);
     font-size: var(--text-xs);
@@ -164,8 +163,8 @@
   }
 
   .tabs button.active {
+    background: var(--surface-2);
     color: var(--text);
-    border-bottom-color: var(--accent);
   }
 
   .count {

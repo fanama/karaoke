@@ -1,5 +1,6 @@
 import type {
   AdminSession,
+  AdminSongsPage,
   CreateRoomResponse,
   PlaybackAction,
   SearchResult,
@@ -34,6 +35,7 @@ export interface RoomApiPort {
   endRoom(code: string): Promise<void>;
   tvSession(): Promise<TVSession>;
   adminSession(): Promise<AdminSession>;
+  adminSongs(offset: number, limit: number, query: string): Promise<AdminSongsPage>;
   adminLogin(token: string): Promise<AdminSession>;
   adminLogout(): Promise<void>;
   adminImport(

@@ -70,10 +70,37 @@ type LibraryStatus struct {
 	LastError  string
 }
 
+// Admin song list bounds, shared by the use case and the HTTP adapter.
+const (
+	// DefaultSongPageSize is the page size used when a request omits one.
+	DefaultSongPageSize = 25
+	// MaxSongPageSize caps how many songs one request may read.
+	MaxSongPageSize = 100
+)
+
+// SongQuery pages and filters the stored library. Offset is the number of songs
+// to skip, Limit the page size, and Query an optional substring filter.
+type SongQuery struct {
+	Offset int
+	Limit  int
+	Query  string
+}
+
+// SongPage is one window of the library plus the total matching the filter.
+type SongPage struct {
+	Songs  []domain.SearchResult
+	Total  int
+	Offset int
+	Limit  int
+	Query  string
+}
+
 // SongLibrary is the local song store searched before the upstream catalog.
 // Saving the same video twice updates it instead of creating a duplicate.
 type SongLibrary interface {
 	Search(ctx context.Context, query string, limit int) ([]domain.SearchResult, error)
+	// List returns one page of stored songs ordered by title, with the total.
+	List(ctx context.Context, query SongQuery) (SongPage, error)
 	// Random samples up to limit songs so the guest screen can suggest tracks.
 	Random(ctx context.Context, limit int) ([]domain.SearchResult, error)
 	// Lookup returns stored metadata so queueing never needs the network.

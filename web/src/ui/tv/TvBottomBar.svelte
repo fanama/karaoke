@@ -105,7 +105,6 @@
     object-fit: cover;
     flex: none;
     background: var(--surface-2);
-    border: 1px solid var(--border);
   }
 
   .now-meta {
@@ -136,10 +135,9 @@
   .playback-controls {
     display: flex;
     align-items: center;
-    gap: var(--space-1);
-    padding: var(--space-1);
+    gap: var(--space-2);
+    padding: var(--space-2);
     background: var(--surface);
-    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
   }
 
@@ -202,6 +200,7 @@
 
     .playback-controls {
       padding: var(--space-1);
+      gap: var(--space-1);
     }
 
     .ctrl {

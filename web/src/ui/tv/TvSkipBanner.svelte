@@ -30,10 +30,8 @@
     align-items: center;
     gap: var(--space-4);
     width: min(720px, calc(100% - 3rem));
-    padding: var(--space-2) var(--space-3);
+    padding: var(--space-4) var(--space-5);
     transform: translateX(-50%);
-    border: 1px solid var(--border-strong);
-    border-left: 2px solid var(--accent);
     border-radius: var(--radius-0);
     background: var(--surface);
   }

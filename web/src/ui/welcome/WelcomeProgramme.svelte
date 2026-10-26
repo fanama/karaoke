@@ -23,7 +23,6 @@
 <style>
   .programme {
     padding: var(--space-5);
-    border-top: 2px solid var(--accent);
   }
 
   h2 {
@@ -35,7 +34,7 @@
 
   ol {
     display: grid;
-    margin: var(--space-4) 0 0;
+    margin: var(--space-5) 0 0;
     padding: 0;
     list-style: none;
   }
@@ -43,14 +42,16 @@
   li {
     display: grid;
     grid-template-columns: 32px minmax(0, 1fr);
-    gap: var(--space-2);
-    padding: var(--space-4) 0;
-    border-top: 1px solid var(--ink-muted);
+    gap: var(--space-3);
+    padding: var(--space-5) 0;
   }
 
   li:first-child {
-    border-top: 0;
     padding-top: 0;
+  }
+
+  li:last-child {
+    padding-bottom: 0;
   }
 
   .step {
@@ -73,23 +74,13 @@
 
     ol {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--space-6);
     }
 
     li {
       grid-template-columns: 1fr;
-      gap: var(--space-2);
-      padding: 0 var(--space-4);
-      border-top: 0;
-      border-left: 1px solid var(--ink-muted);
-    }
-
-    li:first-child {
-      padding-left: 0;
-      border-left: 0;
-    }
-
-    li:last-child {
-      padding-right: 0;
+      gap: var(--space-3);
+      padding: 0;
     }
   }
 </style>

@@ -73,6 +73,16 @@ func (f *fakeLibrary) Cache(_ context.Context, songs []domain.SearchResult) erro
 
 func (f *fakeLibrary) Count(context.Context) (int, error) { return f.total, nil }
 
+func (f *fakeLibrary) List(_ context.Context, query ports.SongQuery) (ports.SongPage, error) {
+	if f.readErr != nil {
+		return ports.SongPage{}, f.readErr
+	}
+	return ports.SongPage{
+		Songs: append([]domain.SearchResult(nil), f.songs...), Total: len(f.songs),
+		Offset: query.Offset, Limit: query.Limit, Query: query.Query,
+	}, nil
+}
+
 func (f *fakeLibrary) Status(context.Context) ports.LibraryStatus {
 	return ports.LibraryStatus{Backend: "fake", Connected: true, Songs: f.total}
 }

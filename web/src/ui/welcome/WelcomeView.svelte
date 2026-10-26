@@ -98,8 +98,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-4);
-    padding: var(--space-3) 0;
-    border-bottom: 1px solid var(--border);
+    padding: var(--space-4) 0;
   }
 
   .brand {
@@ -115,7 +114,6 @@
     place-items: center;
     width: 40px;
     height: 40px;
-    border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text);
   }
@@ -142,18 +140,19 @@
     display: inline-flex;
     align-items: center;
     min-height: 44px;
+    padding-inline: var(--space-2);
+    border-radius: var(--radius-sm);
     color: var(--muted);
     font-family: var(--mono);
     font-size: var(--text-2xs);
     letter-spacing: 0.1em;
     text-transform: uppercase;
     text-decoration: none;
-    border-bottom: 2px solid transparent;
   }
 
   .masthead-nav a:hover {
+    background: var(--surface-2);
     color: var(--text);
-    border-bottom-color: var(--accent);
   }
 
   .masthead :global(.lang-toggle) {
@@ -163,7 +162,7 @@
   .hero {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    border: 1px solid var(--border);
+    background: var(--surface);
     margin-top: var(--space-5);
   }
 
@@ -202,7 +201,7 @@
   }
 
   main :global(section) {
-    margin-top: var(--space-6);
+    margin-top: var(--space-7);
   }
 
   @media (min-width: 900px) {
@@ -211,7 +210,7 @@
     }
 
     .masthead {
-      padding-block: var(--space-4);
+      padding-block: var(--space-5);
     }
 
     .masthead-nav {
@@ -241,7 +240,7 @@
     }
 
     main :global(section) {
-      margin-top: var(--space-7);
+      margin-top: var(--space-8);
     }
   }
 </style>

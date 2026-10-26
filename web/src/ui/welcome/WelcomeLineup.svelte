@@ -36,8 +36,6 @@
 
 <style>
   .lineup h2 {
-    padding-top: var(--space-3);
-    border-top: 2px solid var(--accent);
     font-size: var(--text-lg);
     font-weight: 800;
     letter-spacing: -0.03em;
@@ -48,7 +46,7 @@
 
   ol {
     display: grid;
-    margin: var(--space-5) 0 0;
+    margin: var(--space-6) 0 0;
     padding: 0;
     list-style: none;
   }
@@ -57,8 +55,7 @@
     display: grid;
     grid-template-columns: 40px minmax(0, 1fr);
     gap: var(--space-2) var(--space-3);
-    padding: var(--space-4) 0;
-    border-top: 1px solid var(--border);
+    padding: var(--space-5) 0;
   }
 
   .num {
@@ -90,10 +87,11 @@
   @media (min-width: 900px) {
     ol {
       grid-template-columns: 1fr 1fr;
+      gap: 0 var(--space-7);
     }
 
     li {
-      padding: var(--space-5) 0;
+      padding: var(--space-6) 0;
     }
 
     .lead {
@@ -116,9 +114,5 @@
       gap: var(--space-4);
     }
 
-    .half + .half {
-      padding-left: var(--space-5);
-      border-left: 1px solid var(--border);
-    }
   }
 </style>

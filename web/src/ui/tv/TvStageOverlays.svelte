@@ -63,9 +63,9 @@
   .overlay-card {
     display: grid;
     justify-items: center;
-    gap: var(--space-3);
+    gap: var(--space-4);
     max-width: 520px;
-    padding: var(--space-6);
+    padding: var(--space-7) var(--space-6);
     text-align: center;
   }
 
@@ -74,7 +74,6 @@
     place-items: center;
     width: 56px;
     height: 56px;
-    border: 1px solid var(--ink);
     color: var(--ink);
   }
 
@@ -95,7 +94,6 @@
   }
 
   .overlay-card .badge {
-    border-color: var(--ink-muted);
     color: var(--ink-muted);
   }
 

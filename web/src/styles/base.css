@@ -204,12 +204,11 @@ a:focus-visible,
 }
 
 .end-card {
-  padding: var(--space-6);
+  padding: var(--space-7) var(--space-6);
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-5);
   justify-items: center;
   max-width: 460px;
-  border-top: 2px solid var(--accent);
 }
 
 .end-card h1 {

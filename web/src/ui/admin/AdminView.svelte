@@ -4,9 +4,14 @@
   import { createAdminController } from '../../application/admin_controller';
   import { getAppContext } from '../../ports/context';
   import LanguageToggle from '../common/LanguageToggle.svelte';
+  import AdminSongList from './AdminSongList.svelte';
 
   const c = createAdminController(getAppContext());
-  const { session, token, format, busy, error, notice, load, login, logout, importLibrary } = c;
+  const {
+    session, token, format, busy, error, notice,
+    songs, songsTotal, songsOffset, songsQuery, loadingSongs, songsError,
+    load, login, logout, importLibrary, filterSongs, previousPage, nextPage, reloadSongs
+  } = c;
 
   onMount(() => {
     load();
@@ -85,14 +90,10 @@
               {#if $session.storage.cacheOnly} · {$tr('admin.cacheOnly')}{/if}
             </p>
             {#if $session.storage.lastSyncAt}
-              <p class="tiny dim">
-                {$tr('admin.lastSync')}: {formatTime($session.storage.lastSyncAt)}
-              </p>
+              <p class="tiny dim">{$tr('admin.lastSync')}: {formatTime($session.storage.lastSyncAt)}</p>
             {/if}
             {#if $session.storage.lastError}
-              <p class="notice">
-                {$tr('admin.lastError')}: {$session.storage.lastError}
-              </p>
+              <p class="notice">{$tr('admin.lastError')}: {$session.storage.lastError}</p>
             {/if}
           </div>
         {/if}
@@ -117,15 +118,29 @@
               <input
                 class="hidden-file"
                 type="file"
-                accept=".sqlite,.sqlite3,.db,.sql,application/vnd.sqlite3,application/octet-stream,application/sql"
+                accept=".sqlite,.sqlite3,.db,.sql,.application/vnd.sqlite3,application/octet-stream,application/sql"
                 disabled={$busy}
                 on:change={pickFile}
               />
             </label>
           </div>
+
+          <AdminSongList
+            {songs}
+            {songsTotal}
+            {songsOffset}
+            {songsQuery}
+            {loadingSongs}
+            {songsError}
+            onFilter={filterSongs}
+            onPrevious={previousPage}
+            onNext={nextPage}
+            onReload={reloadSongs}
+          />
         {:else}
           <div class="notice">{$tr('admin.libraryDisabled')}</div>
         {/if}
+
         {#if $error}<p class="error-text" role="alert">{$error}</p>{/if}
         {#if $notice}<p class="success-text" role="status">{$notice}</p>{/if}
         <div class="row">
@@ -140,12 +155,11 @@
 <style>
   .admin-card {
     display: grid;
-    gap: var(--space-5);
+    gap: var(--space-6);
     width: 100%;
-    max-width: 560px;
-    padding: var(--space-5);
+    max-width: 860px;
+    padding: var(--space-6) var(--space-5);
     text-align: left;
-    border-top: 2px solid var(--accent);
   }
 
   .admin-card h1 {
@@ -157,15 +171,13 @@
 
   .admin-library {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-5);
   }
 
   .storage {
     display: grid;
-    gap: var(--space-1);
-    padding: var(--space-3);
-    border: 1px solid var(--border);
-    border-left: 2px solid var(--accent);
+    gap: var(--space-2);
+    padding: var(--space-4);
     background: var(--surface-2);
   }
 
@@ -177,9 +189,8 @@
   }
 
   .notice {
-    padding: var(--space-3);
-    border: 1px solid var(--border);
-    border-left: 2px solid var(--accent);
+    padding: var(--space-4);
+    background: var(--surface-2);
     color: var(--muted);
     font-size: var(--text-xs);
     line-height: 1.5;
@@ -193,5 +204,11 @@
 
   .hidden-file {
     display: none;
+  }
+
+  @media (min-width: 700px) {
+    .admin-card {
+      padding: var(--space-6);
+    }
   }
 </style>

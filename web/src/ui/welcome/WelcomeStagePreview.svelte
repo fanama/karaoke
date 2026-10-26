@@ -38,7 +38,7 @@
 
 <style>
   .stage-panel {
-    border: 1px solid var(--border);
+    background: var(--surface);
     border-radius: var(--radius-0);
   }
 
@@ -48,8 +48,7 @@
     justify-content: space-between;
     gap: var(--space-4);
     height: 40px;
-    padding: 0 var(--space-4);
-    border-bottom: 1px solid var(--border);
+    padding: 0 var(--space-5);
     color: var(--muted);
     font-family: var(--mono);
     font-size: var(--text-2xs);
@@ -68,7 +67,7 @@
     gap: var(--space-4);
     aspect-ratio: 16 / 10;
     max-height: 460px;
-    padding: var(--space-4);
+    padding: var(--space-5);
     background: var(--bg);
   }
 
@@ -160,7 +159,7 @@
 
   @media (min-width: 700px) {
     .screen {
-      padding: var(--space-5);
+      padding: var(--space-6);
     }
 
     .code {

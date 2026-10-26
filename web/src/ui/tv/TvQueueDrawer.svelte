@@ -104,11 +104,11 @@
     z-index: 55;
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-4);
     width: min(400px, 92vw);
-    padding: var(--space-4);
+    padding: var(--space-5);
     background: var(--surface);
-    border-left: 1px solid var(--border-strong);
+    box-shadow: var(--shadow-hard);
     transform: translateX(102%);
     transition: transform 0.2s ease;
   }
@@ -136,10 +136,15 @@
     width: 40px;
     height: 40px;
     padding: 0;
-    border: 1px solid var(--border);
+    border: 0;
     border-radius: var(--radius-sm);
-    background: transparent;
+    background: var(--surface-2);
     color: var(--muted);
+  }
+
+  .tool-btn:hover {
+    background: var(--surface-3);
+    color: var(--text);
   }
 
   .drawer-actions {
@@ -165,9 +170,8 @@
   .drawer-item {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) 0;
-    border-top: 1px solid var(--border);
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
     cursor: grab;
   }
 
@@ -222,14 +226,14 @@
     height: 40px;
     flex: none;
     padding: 0;
-    border: 1px solid transparent;
+    border: 0;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--danger);
   }
 
   .remove-btn:hover {
-    border-color: var(--danger);
+    background: var(--danger-soft);
   }
 
   .drawer-empty {
@@ -241,9 +245,8 @@
 
   .drawer-footer {
     display: grid;
-    gap: var(--space-2);
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--border);
+    gap: var(--space-3);
+    margin-top: var(--space-2);
   }
 
   .confirm-row {

@@ -87,9 +87,8 @@
     justify-content: space-between;
     gap: var(--space-2);
     width: min(720px, 100%);
-    padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom));
+    padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
     background: var(--surface);
-    border-top: 1px solid var(--border);
   }
 
   .host-playback {
@@ -103,14 +102,15 @@
     width: 44px;
     height: 44px;
     padding: 0;
-    border: 1px solid var(--border);
+    border: 0;
     border-radius: var(--radius-sm);
     background: var(--surface-2);
     color: var(--text);
   }
 
   .hbtn:hover:not(:disabled) {
-    border-color: var(--accent);
+    background: var(--surface-3);
+    color: var(--accent);
   }
 
   .hbtn:disabled {

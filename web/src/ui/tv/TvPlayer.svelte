@@ -100,7 +100,6 @@
     width: 84px;
     height: 84px;
     margin-bottom: var(--space-2);
-    border: 2px solid var(--accent);
     color: var(--accent);
   }
 

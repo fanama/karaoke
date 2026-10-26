@@ -89,7 +89,7 @@
     width: 44px;
     height: 44px;
     padding: 0;
-    border: 1px solid var(--border);
+    border: 0;
     border-radius: var(--radius-sm);
     background: var(--surface);
     color: var(--text);
@@ -97,7 +97,7 @@
   }
 
   .tool-btn:hover {
-    border-color: var(--accent);
+    background: var(--surface-3);
     color: var(--accent);
   }
 

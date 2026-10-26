@@ -18,6 +18,7 @@ func (s *Server) routes(mux *http.ServeMux) {
 	mux.HandleFunc("GET /api/admin/session", s.handleAdminSession)
 	mux.HandleFunc("POST /api/admin/login", s.handleAdminLogin)
 	mux.HandleFunc("POST /api/admin/logout", s.handleAdminLogout)
+	mux.HandleFunc("GET /api/admin/library/songs", s.handleAdminSongs)
 	mux.HandleFunc("GET /api/admin/library/export", s.handleAdminExport)
 	mux.HandleFunc("POST /api/admin/library/import", s.handleAdminImport)
 	mux.HandleFunc("POST /api/rooms/{code}/songs", s.handleAddSong)

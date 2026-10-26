@@ -238,7 +238,6 @@
     place-items: center;
     width: 180px;
     height: 180px;
-    border: 1px solid var(--accent);
     color: var(--accent);
   }
 

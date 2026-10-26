@@ -162,7 +162,6 @@
     width: 64px;
     height: 64px;
     margin-bottom: var(--space-1);
-    border: 1px solid var(--accent);
     color: var(--accent);
   }
 

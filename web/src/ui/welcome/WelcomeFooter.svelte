@@ -14,10 +14,8 @@
 <style>
   footer {
     display: grid;
-    gap: var(--space-2);
-    margin-top: var(--space-7);
-    padding-top: var(--space-4);
-    border-top: 1px solid var(--border);
+    gap: var(--space-3);
+    margin-top: var(--space-8);
     color: var(--muted);
     font-family: var(--mono);
     font-size: var(--text-2xs);

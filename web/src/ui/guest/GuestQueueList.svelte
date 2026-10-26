@@ -85,9 +85,7 @@
     align-items: baseline;
     justify-content: space-between;
     gap: var(--space-4);
-    margin-top: var(--space-1);
-    padding-top: var(--space-3);
-    border-top: 2px solid var(--accent);
+    margin-top: var(--space-4);
   }
 
   .queue-heading h2 {
@@ -106,7 +104,7 @@
   .queue-list {
     display: grid;
     gap: 0;
-    margin: var(--space-2) 0 0;
+    margin: var(--space-3) 0 0;
     padding: 0;
     list-style: none;
   }
@@ -114,14 +112,13 @@
   .queue-item {
     display: flex;
     align-items: center;
-    gap: var(--space-2);
-    padding: var(--space-2) 0;
-    border-top: 1px solid var(--border);
+    gap: var(--space-3);
+    padding: var(--space-3) 0;
   }
 
   .queue-item.mine {
-    border-left: 2px solid var(--accent);
-    padding-left: var(--space-2);
+    padding-inline: var(--space-2);
+    background: var(--accent-soft);
   }
 
   .position {
@@ -176,10 +173,10 @@
     gap: var(--space-1);
     min-width: 56px;
     min-height: 44px;
-    padding: 0 var(--space-2);
-    border: 1px solid var(--border);
+    padding: 0 var(--space-3);
+    border: 0;
     border-radius: var(--radius-sm);
-    background: transparent;
+    background: var(--surface-2);
     color: var(--muted);
     font-family: var(--mono);
     font-size: var(--text-2xs);
@@ -187,7 +184,6 @@
   }
 
   .vote-btn.active {
-    border-color: var(--accent);
     background: var(--accent-soft);
     color: var(--accent);
   }
@@ -203,9 +199,9 @@
     width: 40px;
     height: 32px;
     padding: 0;
-    border: 1px solid var(--border);
+    border: 0;
     border-radius: var(--radius-sm);
-    background: transparent;
+    background: var(--surface-2);
     color: var(--muted);
   }
 

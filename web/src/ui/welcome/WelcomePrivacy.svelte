@@ -32,9 +32,7 @@
   }
 
   .note {
-    margin-top: var(--space-4);
-    padding-top: var(--space-3);
-    border-top: 1px solid var(--ink-muted);
+    margin-top: var(--space-5);
     max-width: 68ch;
     color: var(--ink-muted);
     font-size: var(--text-2xs);

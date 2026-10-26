@@ -121,7 +121,6 @@
         </div>
       </div>
     {/if}
-    <hr />
     <div class="library">
       <p class="label">{$tr('room.library')}</p>
       <p class="tiny dim">{$tr('room.libraryBody')}</p>
@@ -145,7 +144,6 @@
       </div>
       {#if $libraryError}<p class="error-text">{$libraryError}</p>{/if}
     </div>
-    <hr />
     {#if !$confirmEnd}
       <button class="btn btn-danger" type="button" on:click={() => confirmEnd.set(true)}>{$tr('room.endRoom')}</button>
     {:else}
@@ -171,15 +169,14 @@
 
   .add-sheet {
     display: grid;
-    gap: var(--space-4);
+    gap: var(--space-5);
   }
 
   .selected-song {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    padding: var(--space-2);
-    border: 1px solid var(--border);
+    padding: var(--space-3);
     border-radius: var(--radius-0);
     background: var(--surface-2);
   }
@@ -202,26 +199,19 @@
 
   .confirm-box {
     display: grid;
-    gap: var(--space-2);
-    padding: var(--space-3);
-    border: 1px solid var(--border);
-    border-left: 2px solid var(--accent);
+    gap: var(--space-3);
+    padding: var(--space-4);
     border-radius: var(--radius-0);
+    background: var(--surface-2);
   }
 
   .confirm-box.danger {
-    border-left-color: var(--danger);
-  }
-
-  hr {
-    border: 0;
-    border-top: 1px solid var(--border);
-    margin: var(--space-1) 0;
+    background: var(--danger-soft);
   }
 
   .library {
     display: grid;
-    gap: var(--space-2);
+    gap: var(--space-3);
   }
 
   .hidden-file {

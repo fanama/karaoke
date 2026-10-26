@@ -23,10 +23,9 @@
     align-items: center;
     gap: var(--space-3);
     max-width: min(90vw, 460px);
-    padding: var(--space-3) var(--space-4);
+    padding: var(--space-4) var(--space-5);
     transform: translateX(-50%);
-    border: 1px solid var(--border-strong);
-    border-left: 2px solid var(--accent);
+    border: 0;
     border-radius: var(--radius-0);
     background: var(--surface);
     color: var(--text);
@@ -34,7 +33,7 @@
   }
 
   .sound-prompt:hover {
-    border-color: var(--accent);
+    background: var(--surface-2);
   }
 
   .sound-prompt-icon {
@@ -43,13 +42,12 @@
     width: 40px;
     height: 40px;
     flex: none;
-    border: 1px solid var(--accent);
     color: var(--accent);
   }
 
   .sound-prompt-copy {
     display: grid;
-    gap: var(--space-1);
+    gap: var(--space-2);
   }
 
   .sound-prompt-copy strong {

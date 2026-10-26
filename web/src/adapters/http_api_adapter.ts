@@ -16,8 +16,9 @@ export class ApiError extends Error implements ApiFailure {
 }
 
 type FetchLike = typeof fetch;
-type RoomMethods = Omit<RoomApiPort, 'adminSession' | 'adminLogin' | 'adminLogout' | 'adminImport'>;
-type AdminMethods = Pick<RoomApiPort, 'adminSession' | 'adminLogin' | 'adminLogout' | 'adminImport'>;
+type AdminKeys = 'adminSession' | 'adminSongs' | 'adminLogin' | 'adminLogout' | 'adminImport';
+type RoomMethods = Omit<RoomApiPort, AdminKeys>;
+type AdminMethods = Pick<RoomApiPort, AdminKeys>;
 
 export function createApiAdapter(fetcher: FetchLike = fetch): RoomApiPort {
   return { ...roomMethods(fetcher), ...adminMethods(fetcher) };
@@ -65,6 +66,11 @@ function roomMethods(fetcher: FetchLike): RoomMethods {
 function adminMethods(fetcher: FetchLike): AdminMethods {
   return {
     adminSession: () => request(fetcher, '/api/admin/session'),
+    adminSongs: (offset: number, limit: number, query: string) =>
+      request(
+        fetcher,
+        `/api/admin/library/songs?offset=${offset}&limit=${limit}&q=${enc(query.trim())}`
+      ),
     adminLogin: (token: string) => request(fetcher, '/api/admin/login', post({ token })),
     adminLogout: () => request(fetcher, '/api/admin/logout', post({})),
     adminImport: (file: File, format: 'sqlite' | 'sql') =>

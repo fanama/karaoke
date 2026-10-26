@@ -53,9 +53,11 @@ type CatalogQueries interface {
 	RandomSongs(ctx context.Context, limit int) ([]domain.SearchResult, error)
 }
 
-// LibraryCommands inspects, exports and merges the local song library.
+// LibraryCommands inspects, lists, exports and merges the local song library.
 type LibraryCommands interface {
 	LibraryStats(ctx context.Context) (int, error)
+	// LibrarySongs pages the stored library for the admin page.
+	LibrarySongs(ctx context.Context, query SongQuery) (SongPage, error)
 	LibraryInfo(ctx context.Context) (LibraryStatus, error)
 	ExportLibrary(ctx context.Context, format LibraryFormat, w io.Writer) error
 	ImportLibrary(ctx context.Context, format LibraryFormat, r io.Reader) (int, error)

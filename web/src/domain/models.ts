@@ -114,6 +114,23 @@ export interface AdminSession {
   storage?: LibraryStorageView;
 }
 
+/** One row of the admin song list. */
+export interface AdminSong {
+  videoId: string;
+  title: string;
+  channel: string;
+  durationSeconds: number;
+}
+
+/** One page of the admin song list, paginated in the backend. */
+export interface AdminSongsPage {
+  songs: AdminSong[];
+  total: number;
+  offset: number;
+  limit: number;
+  query: string;
+}
+
 export interface QueueSelection {
   videoId?: string;
   url?: string;

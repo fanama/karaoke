@@ -32,11 +32,6 @@
   {/if}
   <p class="ticket-hint">{$tr('welcome.joinHint')}</p>
 
-  <div class="perforation" aria-hidden="true">
-    <span class="notch notch-left"></span>
-    <span class="notch notch-right"></span>
-  </div>
-
   <ul class="stub">
     <li>{$tr('welcome.ticketNoAccounts')}</li>
     <li>{$tr('welcome.ticketInMemory')}</li>
@@ -47,11 +42,10 @@
   .ticket {
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
+    gap: var(--space-3);
     height: 100%;
     padding: var(--space-5);
     background: var(--paper);
-    border-top: 2px solid var(--accent);
     border-radius: var(--radius-0);
     color: var(--ink);
   }
@@ -90,7 +84,6 @@
   .ticket-submit {
     min-height: 52px;
     margin-top: var(--space-2);
-    border-color: var(--ink);
     border-radius: var(--radius-0);
     background: var(--ink);
     color: var(--paper);
@@ -103,8 +96,8 @@
   }
 
   .ticket-error {
-    padding-left: var(--space-2);
-    border-left: 2px solid var(--danger);
+    padding: var(--space-2) var(--space-3);
+    background: var(--danger-soft);
     color: var(--ink);
     font-size: var(--text-xs);
     font-weight: 700;
@@ -116,33 +109,10 @@
     line-height: 1.45;
   }
 
-  .perforation {
-    position: relative;
-    margin: var(--space-3) 0 var(--space-2);
-    border-top: 1px dashed var(--ink-muted);
-  }
-
-  .notch {
-    position: absolute;
-    top: -8px;
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    background: var(--bg);
-  }
-
-  .notch-left {
-    left: calc(-1 * var(--space-5) - 8px);
-  }
-
-  .notch-right {
-    right: calc(-1 * var(--space-5) - 8px);
-  }
-
   .stub {
     display: grid;
-    gap: var(--space-2);
-    margin: 0;
+    gap: var(--space-3);
+    margin: var(--space-5) 0 0;
     padding: 0;
     list-style: none;
   }
@@ -168,15 +138,7 @@
   @media (min-width: 900px) {
     .ticket {
       padding: var(--space-6);
-      gap: var(--space-3);
-    }
-
-    .notch-left {
-      left: calc(-1 * var(--space-6) - 8px);
-    }
-
-    .notch-right {
-      right: calc(-1 * var(--space-6) - 8px);
+      gap: var(--space-4);
     }
   }
 </style>
