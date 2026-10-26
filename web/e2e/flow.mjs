@@ -70,7 +70,7 @@ try {
   note('first song auto-starts on TV', nowTitle.length > 3, nowTitle.slice(0, 50));
   await guest.screenshot({ path: '/tmp/fana-guest-queue.png', fullPage: true });
 
-  await guest.locator('.lock-btn').click();
+  await guest.locator('[data-testid="unlock-host"]').click();
   await guest.waitForSelector('#pin', { timeout: 5000 });
   await guest.locator('#pin').fill(pin);
   await guest.getByRole('button', { name: /Unlock|Déverrouiller/i }).last().click();

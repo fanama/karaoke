@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tr } from '../../application/i18n';
   import type { Snapshot } from '../../domain/models';
+  import Icon from '../common/Icon.svelte';
 
   export let snap: Snapshot;
   export let busy: boolean;
@@ -12,32 +13,65 @@
 <div class="host-bar">
   <div class="host-playback">
     {#if snap.nowPlaying?.status === 'playing'}
-      <button class="hbtn" type="button" on:click={() => onPlayback('pause')} disabled={busy} aria-label={$tr('tv.pause')}>
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>
+      <button
+        class="hbtn"
+        type="button"
+        on:click={() => onPlayback('pause')}
+        disabled={busy}
+        aria-label={$tr('tv.pause')}
+      >
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+          <rect x="6" y="5" width="4" height="14" /><rect x="14" y="5" width="4" height="14" />
+        </svg>
       </button>
     {:else}
-      <button class="hbtn" type="button" on:click={() => onPlayback('play')} disabled={busy} aria-label={$tr('tv.play')}>
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M7 5v14l12-7z"/></svg>
+      <button
+        class="hbtn"
+        type="button"
+        on:click={() => onPlayback('play')}
+        disabled={busy}
+        aria-label={$tr('tv.play')}
+      >
+        <Icon name="play" size={20} />
       </button>
     {/if}
-    <button class="hbtn" type="button" on:click={() => onPlayback('next')} disabled={busy} aria-label={$tr('tv.next')}>
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6 5v14l9-7z"/><rect x="16" y="5" width="2" height="14" rx="1"/></svg>
+    <button
+      class="hbtn"
+      type="button"
+      on:click={() => onPlayback('next')}
+      disabled={busy}
+      aria-label={$tr('tv.next')}
+    >
+      <Icon name="skip" size={20} />
     </button>
     {#if snap.nowPlaying?.status === 'countdown'}
-      <button class="hbtn" type="button" on:click={() => onPlayback('cancelCountdown')} disabled={busy} aria-label={$tr('tv.cancel')} title={$tr('tv.cancel')}>
-        ✕
+      <button
+        class="hbtn"
+        type="button"
+        on:click={() => onPlayback('cancelCountdown')}
+        disabled={busy}
+        aria-label={$tr('tv.cancel')}
+        title={$tr('tv.cancel')}
+      >
+        <Icon name="close" size={18} />
       </button>
     {/if}
   </div>
+
   <span class="host-mode-label">{$tr('room.hostMode')}</span>
+
   <div class="host-playback">
-    <button class="hbtn" type="button" on:click={onToggleLock} aria-label={$tr(snap.room.queueLocked ? 'room.unlock' : 'room.lock')}>
-      <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2">
-        <rect x="5" y="11" width="14" height="9" rx="2"/>
-        {#if snap.room.queueLocked}<path d="M8 11V8a4 4 0 0 1 7.5-1.9"/>{:else}<path d="M8 11V8a4 4 0 0 1 8 0v3"/>{/if}
-      </svg>
+    <button
+      class="hbtn"
+      type="button"
+      on:click={onToggleLock}
+      aria-label={$tr(snap.room.queueLocked ? 'room.unlock' : 'room.lock')}
+    >
+      <Icon name="lock" size={18} />
     </button>
-    <button class="btn btn-secondary btn-sm" type="button" on:click={onManage}>{$tr('room.manage')}</button>
+    <button class="btn btn-secondary btn-sm" type="button" on:click={onManage}>
+      {$tr('room.manage')}
+    </button>
   </div>
 </div>
 
@@ -47,44 +81,48 @@
     left: 50%;
     bottom: 0;
     transform: translateX(-50%);
-    width: min(720px, 100%);
     z-index: 40;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.6rem;
-    padding: 0.6rem 1rem calc(0.6rem + env(safe-area-inset-bottom));
-    background: rgb(18 10 31 / 0.97);
-    border-top: 1px solid var(--border-bright);
-    backdrop-filter: blur(14px);
+    gap: var(--space-2);
+    width: min(720px, 100%);
+    padding: var(--space-2) var(--space-4) calc(var(--space-2) + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
   }
 
   .host-playback {
     display: flex;
-    gap: 0.35rem;
+    gap: var(--space-1);
   }
 
   .hbtn {
     display: grid;
     place-items: center;
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     padding: 0;
-    border-radius: 50%;
     border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
     background: var(--surface-2);
     color: var(--text);
   }
 
-  .hbtn:hover {
-    border-color: var(--magenta);
+  .hbtn:hover:not(:disabled) {
+    border-color: var(--accent);
+  }
+
+  .hbtn:disabled {
+    opacity: 0.45;
   }
 
   .host-mode-label {
-    font-size: 0.66rem;
-    font-weight: 800;
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--magenta);
   }
 </style>

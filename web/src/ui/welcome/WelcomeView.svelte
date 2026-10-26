@@ -2,9 +2,13 @@
   import { tr } from '../../application/i18n';
   import { createWelcomeController } from '../../application/welcome_controller';
   import { getAppContext } from '../../ports/context';
+  import Icon from '../common/Icon.svelte';
   import LanguageToggle from '../common/LanguageToggle.svelte';
-  import WelcomeFeatures from './WelcomeFeatures.svelte';
   import WelcomeFooter from './WelcomeFooter.svelte';
+  import WelcomeJoinTicket from './WelcomeJoinTicket.svelte';
+  import WelcomeLineup from './WelcomeLineup.svelte';
+  import WelcomePrivacy from './WelcomePrivacy.svelte';
+  import WelcomeProgramme from './WelcomeProgramme.svelte';
   import WelcomeStagePreview from './WelcomeStagePreview.svelte';
 
   const { creating, createError, code, joinError, joining, createRoom, joinRoom } =
@@ -16,72 +20,67 @@
 </svelte:head>
 
 <div class="welcome">
-  <div class="glow glow-a"></div>
-  <div class="glow glow-b"></div>
-
-  <header class="topbar">
+  <header class="masthead">
     <a class="brand" href="/" aria-label="Fana Karaoke">
       <span class="brand-mark" aria-hidden="true">
-        <svg viewBox="0 0 32 32" width="28" height="28">
-          <path d="M12 23V9l12-3v13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <circle cx="9" cy="24" r="4" fill="var(--cyan)"/>
-          <circle cx="21" cy="20" r="4" fill="var(--magenta)"/>
+        <svg viewBox="0 0 32 32" width="26" height="26">
+          <path
+            d="M12 23V9l12-3v13"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <circle cx="9" cy="24" r="4" fill="var(--accent)" />
+          <circle cx="21" cy="20" r="4" fill="var(--accent)" />
         </svg>
       </span>
-      <span>Fana <strong>Karaoke</strong></span>
+      <span class="brand-name">Fana <strong>Karaoke</strong></span>
     </a>
-    <div class="row">
-      <a class="btn btn-ghost btn-sm desktop-only" href="#how">{$tr('welcome.howOpen')}</a>
-      <a class="btn btn-ghost btn-sm desktop-only" href="#privacy">{$tr('welcome.privacyOpen')}</a>
-      <LanguageToggle />
-    </div>
+    <nav class="masthead-nav" aria-label="About">
+      <a href="#how">{$tr('welcome.howOpen')}</a>
+      <a href="#privacy">{$tr('welcome.privacyOpen')}</a>
+    </nav>
+    <LanguageToggle />
   </header>
 
   <main>
     <section class="hero">
       <div class="hero-copy">
-        <p class="eyebrow"><span></span>{$tr('welcome.eyebrow')}</p>
+        <p class="eyebrow">{$tr('welcome.eyebrow')}</p>
         <h1>{$tr('welcome.title')}</h1>
         <p class="lede">{$tr('welcome.subtitle')}</p>
 
         <div class="actions">
-          <button class="btn btn-primary btn-lg" type="button" on:click={createRoom} disabled={$creating}>
-            {#if $creating}<span class="spinner"></span>{$tr('common.creating')}{:else}{$tr('common.createRoom')}{/if}
+          <button
+            class="btn btn-primary btn-lg"
+            type="button"
+            data-testid="create-room"
+            on:click={createRoom}
+            disabled={$creating}
+          >
+            {#if $creating}<span class="spinner"></span>{$tr('common.creating')}{:else}
+              {$tr('common.createRoom')}
+            {/if}
           </button>
+          <a class="btn btn-secondary btn-lg" href="#how">
+            {$tr('welcome.howOpen')}
+            <Icon name="chevron" size={14} />
+          </a>
         </div>
         {#if $createError}
           <p class="error-text" role="alert">{$createError}</p>
         {/if}
-
-        <form class="join-card card" on:submit|preventDefault={joinRoom}>
-          <div>
-            <h2>{$tr('welcome.joinTitle')}</h2>
-            <p class="small muted">{$tr('welcome.joinHint')}</p>
-          </div>
-          <div class="join-row">
-            <label class="visually-hidden" for="room-code">{$tr('welcome.joinLabel')}</label>
-            <input
-              id="room-code"
-              class="input input-mono"
-              bind:value={$code}
-              placeholder={$tr('welcome.joinPlaceholder')}
-              autocomplete="off"
-              autocapitalize="characters"
-              spellcheck="false"
-              inputmode="text"
-            />
-            <button class="btn btn-secondary" type="submit" disabled={$joining}>
-              {#if $joining}<span class="spinner"></span>{/if}{$tr('common.join')}
-            </button>
-          </div>
-          {#if $joinError}<p class="error-text" role="alert">{$joinError}</p>{/if}
-        </form>
       </div>
 
-      <WelcomeStagePreview />
+      <WelcomeJoinTicket {code} {joining} {joinError} onJoin={joinRoom} />
     </section>
 
-    <WelcomeFeatures />
+    <WelcomeStagePreview />
+    <WelcomeLineup />
+    <WelcomeProgramme />
+    <WelcomePrivacy />
   </main>
 
   <WelcomeFooter />
@@ -89,66 +88,26 @@
 
 <style>
   .welcome {
-    position: relative;
-    overflow: hidden;
     min-height: 100dvh;
-    padding: 0 1.25rem 2rem;
-  }
-
-  .glow {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    pointer-events: none;
-    opacity: 0.45;
-    z-index: 0;
-  }
-
-  .glow-a {
-    width: 520px;
-    height: 520px;
-    background: #9d1d64;
-    top: -220px;
-    right: -120px;
-  }
-
-  .glow-b {
-    width: 460px;
-    height: 460px;
-    background: #0e5d70;
-    bottom: -260px;
-    left: -160px;
-    opacity: 0.3;
-  }
-
-  .topbar,
-  main {
-    position: relative;
-    z-index: 1;
     max-width: 1180px;
     margin: 0 auto;
+    padding: 0 var(--space-5) var(--space-6);
   }
 
-  .topbar {
+  .masthead {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    padding: 1.4rem 0;
+    gap: var(--space-4);
+    padding: var(--space-3) 0;
+    border-bottom: 1px solid var(--border);
   }
 
   .brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: var(--space-3);
     color: var(--text);
     text-decoration: none;
-    font-size: 1.05rem;
-    letter-spacing: -0.02em;
-  }
-
-  .brand strong {
-    color: var(--magenta);
   }
 
   .brand-mark {
@@ -156,104 +115,133 @@
     place-items: center;
     width: 40px;
     height: 40px;
-    border-radius: 12px;
-    border: 1px solid var(--border-bright);
-    background: var(--surface);
-    color: var(--magenta);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+  }
+
+  .brand-name {
+    font-size: var(--text-sm);
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .brand-name strong {
+    color: var(--accent);
+  }
+
+  .masthead-nav {
+    display: none;
+    align-items: center;
+    gap: var(--space-5);
+    margin-left: auto;
+  }
+
+  .masthead-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+  }
+
+  .masthead-nav a:hover {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+
+  .masthead :global(.lang-toggle) {
+    margin-left: auto;
   }
 
   .hero {
     display: grid;
-    grid-template-columns: 1.05fr 0.95fr;
-    gap: 3rem;
-    align-items: center;
-    min-height: 66vh;
-    padding: 3rem 0 4rem;
+    grid-template-columns: minmax(0, 1fr);
+    border: 1px solid var(--border);
+    margin-top: var(--space-5);
   }
 
-  .eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.55rem;
-    margin-bottom: 1rem;
-    color: var(--cyan);
-    font-size: 0.75rem;
+  .hero-copy {
+    padding: var(--space-5);
+  }
+
+  .hero h1 {
+    margin: var(--space-4) 0 0;
+    max-width: 11ch;
+    font-size: clamp(2.75rem, 6.2vw, 5.5rem);
     font-weight: 800;
-    letter-spacing: 0.18em;
+    line-height: 0.95;
+    letter-spacing: -0.035em;
     text-transform: uppercase;
-  }
-
-  .eyebrow span {
-    width: 26px;
-    height: 2px;
-    background: var(--cyan);
-  }
-
-  h1 {
-    font-size: clamp(2.6rem, 5.4vw, 4.6rem);
-    line-height: 0.98;
-    font-weight: 900;
-    max-width: 13ch;
-    background: linear-gradient(120deg, #fff 35%, #ffc2df 70%, var(--magenta));
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+    text-wrap: balance;
   }
 
   .lede {
-    margin: 1.5rem 0 1.8rem;
+    margin-top: var(--space-5);
     max-width: 46ch;
     color: var(--muted);
-    font-size: 1.08rem;
-    line-height: 1.6;
+    font-size: var(--text-sm);
+    line-height: 1.55;
   }
 
   .actions {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.8rem;
-    margin-bottom: 0.7rem;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-5);
   }
 
-  .join-card {
-    margin-top: 2rem;
-    padding: 1.1rem;
-    display: grid;
-    gap: 0.85rem;
-    max-width: 480px;
+  .actions .btn {
+    width: 100%;
   }
 
-  .join-card h2 {
-    font-size: 1rem;
+  main :global(section) {
+    margin-top: var(--space-6);
   }
 
-  .join-row {
-    display: flex;
-    gap: 0.5rem;
-  }
+  @media (min-width: 900px) {
+    .welcome {
+      padding-inline: var(--space-6);
+    }
 
-  .join-row .input {
-    flex: 1;
-  }
+    .masthead {
+      padding-block: var(--space-4);
+    }
 
-  @media (max-width: 900px) {
+    .masthead-nav {
+      display: flex;
+    }
+
+    .masthead :global(.lang-toggle) {
+      margin-left: 0;
+    }
+
     .hero {
-      grid-template-columns: 1fr;
-      gap: 2.5rem;
-      padding-top: 1.5rem;
+      grid-template-columns: minmax(0, 1fr) 420px;
+      margin-top: var(--space-6);
     }
 
-    .desktop-only {
-      display: none;
+    .hero-copy {
+      padding: var(--space-7) var(--space-6);
     }
-  }
 
-  @media (max-width: 420px) {
-    .join-row {
-      flex-direction: column;
+    .actions {
+      flex-direction: row;
+      align-items: center;
     }
-    .join-row .btn {
-      width: 100%;
+
+    .actions .btn {
+      width: auto;
+    }
+
+    main :global(section) {
+      margin-top: var(--space-7);
     }
   }
 </style>

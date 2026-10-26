@@ -3,6 +3,7 @@
   import { tr } from '../../application/i18n';
   import { formatDuration } from '../../domain/playback';
   import type { SearchResult } from '../../domain/models';
+  import Icon from '../common/Icon.svelte';
 
   export let suggestions: Writable<SearchResult[]>;
   export let loadingSuggestions: Writable<boolean>;
@@ -17,12 +18,12 @@
     <header class="vignettes-head">
       <p class="vignettes-title">{$tr('room.suggestionsTitle')}</p>
       <button
-        class="btn btn-ghost btn-sm shuffle"
+        class="btn btn-ghost btn-sm"
         type="button"
         on:click={onShuffle}
         disabled={$loadingSuggestions}
       >
-        <span class="shuffle-icon" aria-hidden="true">⤨</span>
+        <Icon name="shuffle" size={14} />
         {$tr('room.shuffle')}
       </button>
     </header>
@@ -31,13 +32,7 @@
       {#each $suggestions as song (song.videoId)}
         <li class="vignette card">
           <div class="vignette-media">
-            <img
-              src={song.thumbnailUrl}
-              alt=""
-              loading="lazy"
-              width="320"
-              height="180"
-            />
+            <img src={song.thumbnailUrl} alt="" loading="lazy" width="320" height="180" />
             <span class="duration-badge">{formatDuration(song.durationSeconds)}</span>
           </div>
           <div class="vignette-body">
@@ -58,7 +53,7 @@
   </section>
 {:else}
   <div class="search-intro">
-    <div class="mic-orb" aria-hidden="true">🎤</div>
+    <span class="mic-mark" aria-hidden="true"><Icon name="microphone" size={26} /></span>
     <p>{$tr('room.searchHint')}</p>
     <p class="tiny dim">{$tr('room.searchMin')}</p>
   </div>
@@ -67,45 +62,33 @@
 <style>
   .vignettes {
     display: grid;
-    gap: 0.7rem;
-    margin-bottom: 1.2rem;
+    gap: var(--space-3);
+    margin-bottom: var(--space-5);
   }
 
   .vignettes-head {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.6rem;
+    gap: var(--space-2);
   }
 
   .vignettes-title {
-    font-size: 0.72rem;
-    font-weight: 800;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
     letter-spacing: 0.16em;
     text-transform: uppercase;
-    color: var(--cyan);
-  }
-
-  .shuffle {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    min-height: 36px;
-    padding: 0 0.7rem;
-  }
-
-  .shuffle-icon {
-    font-size: 1rem;
-    line-height: 1;
   }
 
   .vignette-grid {
-    list-style: none;
-    margin: 0;
-    padding: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.65rem;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
   .vignette {
@@ -113,12 +96,11 @@
     grid-template-rows: auto 1fr;
     padding: 0;
     overflow: hidden;
-    border-radius: 14px;
   }
 
   .vignette-media {
     position: relative;
-    background: var(--surface-3);
+    background: var(--surface-2);
   }
 
   .vignette-media img {
@@ -130,67 +112,67 @@
 
   .duration-badge {
     position: absolute;
-    right: 0.35rem;
-    bottom: 0.35rem;
-    padding: 0.1rem 0.35rem;
-    border-radius: 6px;
-    background: rgb(8 5 15 / 0.82);
-    font-family: var(--mono);
-    font-size: 0.7rem;
-    font-weight: 700;
+    right: 0;
+    bottom: 0;
+    padding: 2px var(--space-1);
+    background: var(--bg);
     color: var(--text);
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
   }
 
   .vignette-body {
     display: grid;
-    gap: 0.3rem;
-    padding: 0.55rem 0.6rem 0.7rem;
     align-content: start;
+    gap: var(--space-1);
+    padding: var(--space-2);
   }
 
   .vignette-title {
-    font-size: 0.82rem;
+    font-size: var(--text-2xs);
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.35;
   }
 
   .vignette-body .btn {
-    margin-top: 0.25rem;
     width: 100%;
-    min-height: 38px;
+    min-height: 36px;
+    margin-top: var(--space-1);
   }
 
   .search-intro {
     display: grid;
     justify-items: center;
-    gap: 0.6rem;
-    text-align: center;
-    padding: 2.4rem 1rem;
+    gap: var(--space-2);
+    padding: var(--space-6) var(--space-4);
     color: var(--muted);
+    text-align: center;
   }
 
   .search-intro p {
     max-width: 36ch;
+    font-size: var(--text-xs);
     line-height: 1.5;
-    font-size: 0.92rem;
   }
 
-  .mic-orb {
+  .mic-mark {
     display: grid;
     place-items: center;
-    width: 72px;
-    height: 72px;
-    border-radius: 50%;
-    background: radial-gradient(circle at 30% 30%, rgb(255 45 149 / 0.35), rgb(139 92 246 / 0.12));
-    border: 1px solid var(--border-bright);
-    box-shadow: 0 0 40px rgb(255 45 149 / 0.18);
-    font-size: 1.8rem;
-    margin-bottom: 0.3rem;
+    width: 64px;
+    height: 64px;
+    margin-bottom: var(--space-1);
+    border: 1px solid var(--accent);
+    color: var(--accent);
   }
 
   @media (min-width: 640px) {
     .vignette-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .vignette-title {
+      font-size: var(--text-xs);
     }
   }
 </style>

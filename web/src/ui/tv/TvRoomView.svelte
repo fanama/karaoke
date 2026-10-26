@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
   import { tr } from '../../application/i18n';
+  import Icon from '../common/Icon.svelte';
   import { createTvController } from '../../application/tv/controller';
   import { getAppContext } from '../../ports/context';
   import { computeElapsed, secondsUntil } from '../../domain/playback';
@@ -113,6 +114,14 @@
   </main>
 {:else}
   <div class="tv">
+    <TvTopBar
+      code={current.room.code}
+      pin={$pin}
+      guestCount={current.room.guestCount}
+      status={$status}
+      onCopy={copyLink}
+    />
+
     <div class="stage">
       {#if current.nowPlaying}
         <TvPlayer
@@ -137,22 +146,13 @@
         />
       {:else}
         <div class="stage-placeholder">
-          <div class="stage-orb">♪</div>
+          <div class="stage-orb" aria-hidden="true"><Icon name="microphone" size={64} /></div>
         </div>
       {/if}
-      <div class="vignette"></div>
       {#if $soundBlocked && !$playerBlocked}
         <TvSoundPrompt onEnable={turnSoundOn} />
       {/if}
     </div>
-
-    <TvTopBar
-      code={current.room.code}
-      pin={$pin}
-      guestCount={current.room.guestCount}
-      status={$status}
-      onCopy={copyLink}
-    />
 
     <TvStageOverlays
       snap={current}
@@ -211,15 +211,18 @@
 <style>
   .tv {
     position: relative;
+    display: flex;
+    flex-direction: column;
     height: 100dvh;
     overflow: hidden;
-    background: #000;
+    background: var(--bg);
   }
 
   .stage {
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 50% 30%, #24103b, #030107 70%);
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    background: var(--bg);
   }
 
   .stage-placeholder {
@@ -227,10 +230,7 @@
     inset: 0;
     display: grid;
     place-items: center;
-    background:
-      radial-gradient(circle at 20% 20%, rgb(255 45 149 / 0.2), transparent 45%),
-      radial-gradient(circle at 80% 80%, rgb(34 211 238 / 0.16), transparent 45%),
-      #08050f;
+    background: var(--surface);
   }
 
   .stage-orb {
@@ -238,21 +238,8 @@
     place-items: center;
     width: 180px;
     height: 180px;
-    border-radius: 50%;
-    border: 1px solid var(--border-bright);
-    color: var(--magenta);
-    font-size: 4rem;
-    box-shadow: 0 0 120px rgb(255 45 149 / 0.2);
-    animation: pulse 3s infinite;
-  }
-
-  .vignette {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background:
-      linear-gradient(to bottom, rgb(3 1 8 / 0.75), transparent 22%, transparent 65%, rgb(3 1 8 / 0.9)),
-      linear-gradient(to right, rgb(3 1 8 / 0.35), transparent 20%, transparent 80%, rgb(3 1 8 / 0.35));
+    border: 1px solid var(--accent);
+    color: var(--accent);
   }
 
   .drawer-scrim {
@@ -260,10 +247,10 @@
     inset: 0;
     z-index: 50;
     border: 0;
-    background: rgb(0 0 0 / 0.45);
+    background: rgb(11 11 12 / 0.72);
   }
 
   .tv-toast {
-    bottom: 145px;
+    bottom: calc(var(--space-9) + var(--space-8));
   }
 </style>

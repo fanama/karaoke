@@ -3,6 +3,7 @@
   import type { RoomView } from '../../domain/models';
   import type { ConnectionStatus } from '../../ports/socket_port';
   import ConnectionDot from '../common/ConnectionDot.svelte';
+  import Icon from '../common/Icon.svelte';
   import LanguageToggle from '../common/LanguageToggle.svelte';
 
   export let room: RoomView;
@@ -17,24 +18,28 @@
 <header class="guest-header">
   <div class="topline">
     <a class="mini-brand" href="/">
-      <span class="dot"></span>
+      <span class="mark" aria-hidden="true"></span>
       {$tr('app.name')}
     </a>
     <div class="row">
       <ConnectionDot {status} compact />
       <LanguageToggle />
       {#if !isHost}
-        <button class="lock-btn" type="button" on:click={onUnlock} aria-label={$tr('room.hostControls')}>
-          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="5" y="11" width="14" height="9" rx="2"/>
-            <path d="M8 11V8a4 4 0 0 1 8 0v3"/>
-          </svg>
+        <button
+          class="btn btn-icon"
+          type="button"
+          data-testid="unlock-host"
+          on:click={onUnlock}
+          aria-label={$tr('room.hostControls')}
+        >
+          <Icon name="lock" size={18} />
         </button>
       {:else}
         <span class="badge badge-cyan">{$tr('room.host')}</span>
       {/if}
     </div>
   </div>
+
   <div class="room-head">
     <div>
       <p class="label">{$tr('room.code')}</p>
@@ -45,6 +50,7 @@
       {#if room.manualOrder}<span class="badge badge-cyan">{$tr('room.manualOrder')}</span>{/if}
     </div>
   </div>
+
   <div class="tabs" role="tablist">
     <button
       type="button"
@@ -73,9 +79,8 @@
     position: sticky;
     top: 0;
     z-index: 30;
-    padding: 0.75rem 1rem 0;
-    background: linear-gradient(to bottom, rgb(8 5 15 / 0.98) 70%, rgb(8 5 15 / 0.86));
-    backdrop-filter: blur(12px);
+    padding: var(--space-3) var(--space-4) 0;
+    background: var(--bg);
     border-bottom: 1px solid var(--border);
   }
 
@@ -83,90 +88,84 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 0.8rem;
-    margin-bottom: 0.8rem;
+    gap: var(--space-3);
+    margin-bottom: var(--space-3);
   }
 
   .mini-brand {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
+    gap: var(--space-2);
     color: var(--text);
     text-decoration: none;
+    font-size: var(--text-2xs);
     font-weight: 800;
-    font-size: 0.86rem;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
-  .mini-brand .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background: var(--magenta);
-    box-shadow: 0 0 12px var(--magenta);
+  .mark {
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
   }
 
-  .lock-btn {
-    display: grid;
-    place-items: center;
-    width: 34px;
-    height: 34px;
-    padding: 0;
-    border-radius: 50%;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-  }
-
-  .lock-btn:hover {
-    color: var(--text);
-    border-color: var(--cyan);
+  .guest-header :global(.btn-icon) {
+    width: 36px;
+    height: 36px;
+    min-height: 36px;
   }
 
   .room-head {
     display: flex;
     align-items: flex-end;
     justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.8rem;
+    gap: var(--space-4);
+    margin-bottom: var(--space-3);
   }
 
   .room-code {
     font-family: var(--mono);
-    font-size: clamp(1.6rem, 8vw, 2.2rem);
+    font-size: var(--text-xl);
+    font-weight: 800;
     letter-spacing: 0.08em;
     line-height: 1.1;
-    color: var(--text);
+    text-transform: uppercase;
   }
 
   .room-stats {
     display: flex;
-    gap: 0.35rem;
     flex-wrap: wrap;
     justify-content: flex-end;
-    padding-bottom: 0.2rem;
+    gap: var(--space-1);
+    padding-bottom: 2px;
   }
 
   .tabs {
     display: flex;
-    gap: 0.4rem;
+    gap: var(--space-2);
   }
 
   .tabs button {
     flex: 1;
-    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
     min-height: 44px;
     border: 0;
     border-bottom: 2px solid transparent;
     background: transparent;
     color: var(--dim);
+    font-size: var(--text-xs);
     font-weight: 800;
-    font-size: 0.9rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
 
   .tabs button.active {
     color: var(--text);
-    border-color: var(--magenta);
+    border-bottom-color: var(--accent);
   }
 
   .count {
@@ -174,17 +173,17 @@
     place-items: center;
     min-width: 20px;
     height: 20px;
-    padding: 0 5px;
-    border-radius: 999px;
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-sm);
     background: var(--surface-3);
-    font-size: 0.7rem;
-    margin-left: 4px;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
   }
 
   @media (min-width: 680px) {
     .guest-header {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
+      padding-inline: var(--space-5);
     }
   }
 </style>

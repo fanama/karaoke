@@ -15,7 +15,7 @@
         <p class="clamp-2 next-title">{next.title}</p>
         <p class="tiny dim">{next.nickname} · {formatDuration(next.durationSeconds)}</p>
       </div>
-      <span class="badge">{next.score} ↑</span>
+      <span class="badge">{next.score}</span>
     </div>
   {:else}
     <p class="label">{$tr('room.upNext')}</p>
@@ -32,20 +32,19 @@
   .next-row {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    margin-top: 0.35rem;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
   }
 
   .next-row img {
     width: 72px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-radius: 7px;
     order: 3;
   }
 
   .next-title {
-    font-size: 0.82rem;
+    font-size: var(--text-xs);
     font-weight: 700;
     line-height: 1.3;
   }

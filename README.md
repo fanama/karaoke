@@ -6,7 +6,9 @@ A browser karaoke room. Put the room on the TV, let guests scan a QR code, searc
 - **Guest view** (`/r/<code>`) — phone-first search, paste-a-link, queue, upvotes, skip votes, and host controls after entering the PIN.
 - Rooms are **ephemeral**: in memory, gone when the host ends them, after two hours without a host, or on restart.
 
-The product and design rationale live in [`fana-karaoke-spec.md`](fana-karaoke-spec.md).
+The product and design rationale live in [`fana-karaoke-spec.md`](fana-karaoke-spec.md); the visual
+system every screen must follow is [`web/DESIGN.md`](web/DESIGN.md), enforced by the gates in
+`internal/architecture/ui_*_test.go`.
 
 Created by [Fanamperantsoa Rakotoasimbola](https://github.com/fanama).
 
@@ -316,3 +318,6 @@ The scripts exercise create/join, QR, paste-add, host unlock, live queue updates
 - YouTube playback requires the official iframe player; the video is never hidden or downloaded.
 - Autoplay: the TV tries to start each song with sound. If the browser refuses (no prior interaction, strict TV browser), playback starts muted instead of stalling and a **Tap for sound** chip appears — one tap anywhere on the TV restores audio. A hard block still shows **Tap to resume**.
 - Not implemented: lyrics overlay, scoring, vocal removal, saved playlists, accounts, moderation, native apps.
+
+
+> PUBLIC_BASE_URL="https://karaoke.lalamazava.duckdns.org"  PORT=8081 bunx pm2 start ./karaoke --name "fana-karaoke"

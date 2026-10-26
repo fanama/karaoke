@@ -1,25 +1,65 @@
 :root {
-  --bg: #08050f;
-  --surface: #120a1f;
-  --surface-2: #1b0f2e;
-  --surface-3: #24143b;
-  --border: #2e1b4a;
-  --border-bright: #4a2a72;
-  --text: #f7f2ff;
-  --muted: #b9a7d6;
-  --dim: #8c79a8;
-  --magenta: #ff2d95;
-  --magenta-dark: #c41f73;
-  --cyan: #22d3ee;
-  --violet: #8b5cf6;
-  --lime: #b6ff3b;
-  --danger: #ff5c5c;
-  --radius: 18px;
-  --radius-sm: 12px;
-  --shadow-neon: 0 0 28px rgb(255 45 149 / 0.32);
-  --shadow-cyan: 0 0 22px rgb(34 211 238 / 0.25);
-  --font: ui-sans-serif, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  /* Stage surfaces */
+  --bg: #0b0b0c;
+  --surface: #141414;
+  --surface-2: #1b1b1c;
+  --surface-3: #232325;
+  --border: #2a2a2c;
+  --border-strong: #3d3d3f;
+
+  /* Ink on stage */
+  --text: #f5f3ee;
+  --muted: #b4b1a9;
+  --dim: #8a877f;
+
+  /* The one accent */
+  --accent: #d8ff3e;
+  --accent-ink: #0b0b0c;
+  --accent-soft: rgb(216 255 62 / 0.14);
+
+  /* Paper */
+  --paper: #f2ede3;
+  --ink: #121110;
+  --ink-muted: #5c5850;
+
+  /* Signals */
+  --danger: #ff5a3c;
+  --danger-soft: rgb(255 90 60 / 0.16);
+
+  /* Type */
+  --font: ui-sans-serif, system-ui, "Helvetica Neue", Helvetica, Arial, sans-serif;
   --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --text-2xs: 0.75rem;
+  --text-xs: 0.875rem;
+  --text-sm: 1rem;
+  --text-md: 1.25rem;
+  --text-lg: 1.5rem;
+  --text-xl: 1.875rem;
+  --text-2xl: 2.5rem;
+  --text-3xl: 3.5rem;
+  --text-display: clamp(2.5rem, 7vw, 5rem);
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  /* Radius */
+  --radius-0: 0;
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-pill: 999px;
+
+  /* Elevation: print offset only, never blur */
+  --shadow-hard: 4px 4px 0 var(--bg);
+
   color-scheme: dark;
 }
 
@@ -29,22 +69,9 @@
   }
 }
 
-@keyframes pulse {
-  50% {
-    opacity: 0.35;
-  }
-}
-
 @keyframes fade {
   from {
     opacity: 0;
-  }
-}
-
-@keyframes rise {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 10px);
   }
 }
 

@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy, onMount } from 'svelte';
   import { tr } from '../../application/i18n';
+  import Icon from '../common/Icon.svelte';
   import type { Status } from '../../domain/models';
   import type { PlayerFailure, PlayerProgress, PlayerTelemetry, VideoPlayerPort } from '../../ports/player_port';
   import { getAppContext } from '../../ports/context';
@@ -53,7 +54,7 @@
   <div class="player" bind:this={container}></div>
   {#if blocked}
     <button class="blocked-overlay" type="button" on:click={forcePlay}>
-      <span class="tap-ring" aria-hidden="true">▶</span>
+      <span class="tap-ring" aria-hidden="true"><Icon name="play" size={28} /></span>
       <strong>{$tr('tv.tapResume')}</strong>
       <small>{$tr('tv.tapResumeBody')}</small>
     </button>
@@ -64,7 +65,7 @@
   .player-wrap {
     position: absolute;
     inset: 0;
-    background: #000;
+    background: var(--bg);
   }
 
   .player,
@@ -85,13 +86,12 @@
     display: grid;
     place-content: center;
     justify-items: center;
-    gap: 0.5rem;
+    gap: var(--space-2);
     border: 0;
-    background: rgb(8 5 15 / 0.72);
-    backdrop-filter: blur(5px);
+    background: rgb(11 11 12 / 0.86);
     color: var(--text);
     text-align: center;
-    padding: 1rem;
+    padding: var(--space-4);
   }
 
   .tap-ring {
@@ -99,20 +99,20 @@
     place-items: center;
     width: 84px;
     height: 84px;
-    border-radius: 50%;
-    border: 2px solid var(--magenta);
-    color: var(--magenta);
-    font-size: 1.8rem;
-    box-shadow: var(--shadow-neon);
-    margin-bottom: 0.5rem;
+    margin-bottom: var(--space-2);
+    border: 2px solid var(--accent);
+    color: var(--accent);
   }
 
   .blocked-overlay strong {
-    font-size: clamp(1.2rem, 2.4vw, 1.8rem);
+    font-size: var(--text-lg);
+    text-transform: uppercase;
   }
 
   .blocked-overlay small {
+    max-width: 42ch;
     color: var(--muted);
-    font-size: 0.9rem;
+    font-size: var(--text-xs);
+    line-height: 1.5;
   }
 </style>

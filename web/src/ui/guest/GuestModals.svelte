@@ -162,36 +162,36 @@
 
 <style>
   .pin-input {
-    font-size: 1.8rem;
-    text-align: center;
-    letter-spacing: 0.5em;
     height: 62px;
+    font-family: var(--mono);
+    font-size: var(--text-lg);
+    letter-spacing: 0.5em;
+    text-align: center;
   }
 
   .add-sheet {
     display: grid;
-    gap: 1rem;
+    gap: var(--space-4);
   }
 
   .selected-song {
     display: flex;
-    gap: 0.7rem;
     align-items: center;
-    padding: 0.6rem;
-    border-radius: 12px;
-    background: var(--surface);
+    gap: var(--space-3);
+    padding: var(--space-2);
     border: 1px solid var(--border);
+    border-radius: var(--radius-0);
+    background: var(--surface-2);
   }
 
   .selected-song img {
     width: 82px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-radius: 7px;
   }
 
   .selected-song p {
-    font-size: 0.88rem;
+    font-size: var(--text-xs);
     font-weight: 700;
     line-height: 1.3;
   }
@@ -201,27 +201,27 @@
   }
 
   .confirm-box {
-    padding: 0.8rem;
-    border-radius: 12px;
-    border: 1px solid var(--border);
-    background: var(--surface);
     display: grid;
-    gap: 0.6rem;
+    gap: var(--space-2);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    border-radius: var(--radius-0);
   }
 
   .confirm-box.danger {
-    border-color: rgb(255 92 92 / 0.4);
+    border-left-color: var(--danger);
   }
 
   hr {
     border: 0;
     border-top: 1px solid var(--border);
-    margin: 0.2rem 0;
+    margin: var(--space-1) 0;
   }
 
   .library {
     display: grid;
-    gap: 0.5rem;
+    gap: var(--space-2);
   }
 
   .hidden-file {

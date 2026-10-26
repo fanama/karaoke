@@ -178,26 +178,25 @@
     min-height: 100dvh;
     max-width: 720px;
     margin: 0 auto;
-    padding-bottom: 2rem;
+    padding-bottom: var(--space-6);
   }
 
   .guest.host {
-    padding-bottom: 5.5rem;
+    padding-bottom: var(--space-9);
   }
 
   .guest-main {
-    padding: 1rem;
+    padding: var(--space-4);
   }
 
   .queue-panel {
     display: grid;
-    gap: 1rem;
+    gap: var(--space-4);
   }
 
   @media (min-width: 680px) {
     .guest-main {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
+      padding-inline: var(--space-5);
     }
   }
 </style>

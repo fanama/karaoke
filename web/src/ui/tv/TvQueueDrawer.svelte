@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tr } from '../../application/i18n';
   import type { QueueItem } from '../../domain/models';
+  import Icon from '../common/Icon.svelte';
 
   export let queue: QueueItem[];
   export let open: boolean;
@@ -29,7 +30,9 @@
         {manualOrder ? $tr('tv.orderLocked') : $tr('tv.autoOrder')}
       </p>
     </div>
-    <button class="tool-btn" type="button" on:click={onClose} aria-label={$tr('tv.closeQueue')}>✕</button>
+    <button class="tool-btn" type="button" on:click={onClose} aria-label={$tr('tv.closeQueue')}>
+      <Icon name="close" size={18} />
+    </button>
   </div>
 
   <div class="drawer-actions">
@@ -51,14 +54,23 @@
         on:drop={(e) => onDrop(e, item.id)}
         class:dragging={dragId === item.id}
       >
-        <span class="drag-handle" aria-hidden="true">⠿</span>
-        <span class="drawer-pos mono">{index + 1}</span>
+        <span class="drag-handle" aria-hidden="true">
+          <i></i><i></i><i></i>
+        </span>
+        <span class="drawer-pos">{index + 1}</span>
         <img src={item.thumbnailUrl} alt="" />
         <div class="grow">
           <p class="clamp-2 drawer-title">{item.title}</p>
-          <p class="tiny dim">{item.nickname} · {item.score} ↑</p>
+          <p class="drawer-meta">{item.nickname} · {item.score}</p>
         </div>
-        <button class="remove-btn" type="button" on:click={() => onRemove(item.id)} aria-label={$tr('tv.removeSong')}>✕</button>
+        <button
+          class="remove-btn"
+          type="button"
+          on:click={() => onRemove(item.id)}
+          aria-label={$tr('tv.removeSong')}
+        >
+          <Icon name="close" size={16} />
+        </button>
       </li>
     {:else}
       <li class="drawer-empty">{$tr('tv.queueEmpty')}</li>
@@ -90,16 +102,15 @@
     right: 0;
     bottom: 0;
     z-index: 55;
-    width: min(400px, 92vw);
     display: flex;
     flex-direction: column;
-    gap: 0.8rem;
-    padding: 1.1rem;
-    background: rgb(13 7 23 / 0.98);
-    border-left: 1px solid var(--border-bright);
-    box-shadow: -20px 0 80px rgb(0 0 0 / 0.5);
+    gap: var(--space-3);
+    width: min(400px, 92vw);
+    padding: var(--space-4);
+    background: var(--surface);
+    border-left: 1px solid var(--border-strong);
     transform: translateX(102%);
-    transition: transform 0.23s ease;
+    transition: transform 0.2s ease;
   }
 
   .queue-drawer.open {
@@ -110,41 +121,53 @@
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
-    gap: 0.8rem;
+    gap: var(--space-3);
   }
 
   .drawer-head h2 {
-    font-size: 1.2rem;
+    font-size: var(--text-md);
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .tool-btn {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--muted);
   }
 
   .drawer-actions {
     display: flex;
-    gap: 0.4rem;
+    gap: var(--space-1);
   }
 
   .drag-hint {
-    margin: -0.3rem 0;
+    margin: calc(-1 * var(--space-1)) 0;
   }
 
   .drawer-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
     display: grid;
-    gap: 0.45rem;
-    overflow-y: auto;
     flex: 1;
     align-content: start;
+    gap: 0;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    list-style: none;
   }
 
   .drawer-item {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.45rem;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--surface);
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--border);
     cursor: grab;
   }
 
@@ -153,63 +176,81 @@
   }
 
   .drag-handle {
-    color: var(--dim);
-    font-size: 0.9rem;
+    display: grid;
+    gap: var(--space-1);
+    flex: none;
     cursor: grab;
   }
 
+  .drag-handle i {
+    display: block;
+    width: 3px;
+    height: 3px;
+    background: var(--dim);
+  }
+
   .drawer-pos {
+    width: 18px;
+    flex: none;
     color: var(--dim);
-    font-size: 0.65rem;
-    width: 14px;
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
   }
 
   .drawer-item img {
     width: 58px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-radius: 6px;
+    flex: none;
   }
 
   .drawer-title {
-    font-size: 0.76rem;
+    font-size: var(--text-xs);
     font-weight: 700;
     line-height: 1.3;
   }
 
+  .drawer-meta {
+    color: var(--dim);
+    font-size: var(--text-2xs);
+  }
+
   .remove-btn {
-    border: 0;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    flex: none;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
     background: transparent;
     color: var(--danger);
-    font-size: 0.8rem;
-    width: 26px;
-    height: 26px;
-    border-radius: 6px;
   }
 
   .remove-btn:hover {
-    background: rgb(255 92 92 / 0.12);
+    border-color: var(--danger);
   }
 
   .drawer-empty {
+    padding: var(--space-4);
     color: var(--dim);
-    font-size: 0.8rem;
-    padding: 1rem;
+    font-size: var(--text-xs);
     text-align: center;
   }
 
   .drawer-footer {
-    border-top: 1px solid var(--border);
-    padding-top: 0.8rem;
     display: grid;
-    gap: 0.5rem;
+    gap: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--border);
   }
 
   .confirm-row {
     display: flex;
-    align-items: center;
-    gap: 0.4rem;
     flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1);
   }
 
   .confirm-row .tiny {

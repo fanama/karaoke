@@ -1,5 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, onMount } from 'svelte';
+  import { tr } from '../../application/i18n';
+  import Icon from './Icon.svelte';
 
   export let open = false;
   export let title = '';
@@ -40,7 +42,14 @@
         <div class="spread" style="margin-bottom: 1rem; align-items: flex-start;">
           <h2>{title}</h2>
           {#if dismissible}
-            <button class="btn btn-ghost btn-sm" type="button" on:click={close} aria-label="Close">✕</button>
+            <button
+              class="btn btn-ghost btn-icon"
+              type="button"
+              on:click={close}
+              aria-label={$tr('common.close')}
+            >
+              <Icon name="close" size={18} />
+            </button>
           {/if}
         </div>
       {/if}

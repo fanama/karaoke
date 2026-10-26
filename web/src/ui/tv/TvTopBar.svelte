@@ -2,6 +2,7 @@
   import { tr } from '../../application/i18n';
   import type { ConnectionStatus } from '../../ports/socket_port';
   import ConnectionDot from '../common/ConnectionDot.svelte';
+  import Icon from '../common/Icon.svelte';
   import LanguageToggle from '../common/LanguageToggle.svelte';
   import TvJoinPanel from './TvJoinPanel.svelte';
 
@@ -27,25 +28,23 @@
   <div class="tv-tools">
     <LanguageToggle />
     <button class="tool-btn" type="button" on:click={onCopy} title={$tr('room.copyTvLink')}>
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/></svg>
+      <Icon name="link" size={18} />
     </button>
     <a class="tool-btn" href={`/r/${code}`} title={$tr('room.viewGuest')}>
-      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg>
+      <Icon name="phone" size={18} />
     </a>
   </div>
 </header>
 
 <style>
   .tv-top {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
+    position: relative;
     z-index: 10;
     display: flex;
     align-items: flex-start;
-    gap: 1.2rem;
-    padding: 1.4rem 1.7rem;
+    gap: var(--space-5);
+    padding: var(--space-4) var(--space-5);
+    background: var(--bg);
     pointer-events: none;
   }
 
@@ -55,56 +54,67 @@
 
   .room-mark {
     display: grid;
-    gap: 0.25rem;
+    gap: var(--space-1);
     min-width: 0;
-    text-shadow: 0 2px 20px rgb(0 0 0 / 0.7);
   }
 
   .tv-code {
+    color: var(--text);
     font-family: var(--mono);
-    font-size: clamp(1.7rem, 2.8vw, 2.7rem);
+    font-size: var(--text-2xl);
+    font-weight: 800;
     letter-spacing: 0.12em;
     line-height: 1;
-    color: #fff;
+    text-transform: uppercase;
   }
 
   .tv-stat {
-    font-size: 0.78rem;
     color: var(--muted);
+    font-size: var(--text-2xs);
     font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .tv-tools {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: var(--space-2);
     margin-left: auto;
   }
 
   .tool-btn {
-    position: relative;
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     padding: 0;
-    border-radius: 50%;
     border: 1px solid var(--border);
-    background: rgb(8 5 15 / 0.65);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
     color: var(--text);
     text-decoration: none;
   }
 
   .tool-btn:hover {
-    border-color: var(--cyan);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  @media (max-width: 900px) {
+    .tv-top {
+      gap: var(--space-3);
+      padding: var(--space-3);
+    }
+
+    .tv-code {
+      font-size: var(--text-lg);
+    }
   }
 
   @media (max-width: 600px) {
-    .tv-top {
-      padding: 0.8rem;
-    }
-    .tv-code {
-      font-size: 1.3rem;
+    .tv-tools {
+      gap: var(--space-1);
     }
   }
 </style>

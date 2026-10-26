@@ -25,56 +25,60 @@
     position: absolute;
     left: 50%;
     bottom: 150px;
-    transform: translateX(-50%);
     z-index: 20;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: var(--space-4);
     width: min(720px, calc(100% - 3rem));
-    padding: 0.6rem 0.9rem;
-    border-radius: 14px;
-    border: 1px solid rgb(255 45 149 / 0.45);
-    background: rgb(30 8 24 / 0.92);
-    backdrop-filter: blur(12px);
-    box-shadow: var(--shadow-neon);
+    padding: var(--space-2) var(--space-3);
+    transform: translateX(-50%);
+    border: 1px solid var(--border-strong);
+    border-left: 2px solid var(--accent);
+    border-radius: var(--radius-0);
+    background: var(--surface);
   }
 
   .skip-copy {
     display: flex;
     flex-direction: column;
-    gap: 0.1rem;
-    font-size: 0.82rem;
+    gap: var(--space-1);
+    font-size: var(--text-xs);
+  }
+
+  .skip-copy strong {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   .skip-copy span {
     color: var(--muted);
-    font-size: 0.72rem;
+    font-size: var(--text-2xs);
   }
 
   .skip-bar {
     flex: 1;
     height: 6px;
-    border-radius: 999px;
-    background: rgb(255 255 255 / 0.14);
+    background: var(--surface-3);
     overflow: hidden;
   }
 
   .skip-bar span {
     display: block;
     height: 100%;
-    background: linear-gradient(90deg, var(--magenta), var(--cyan));
-    transition: width 0.25s ease;
+    background: var(--accent);
+    transition: width 0.2s ease;
   }
 
   .skip-time {
-    font-size: 0.85rem;
-    color: var(--magenta);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: var(--text-xs);
   }
 
   @media (max-width: 600px) {
     .skip-banner {
       bottom: 104px;
-      gap: 0.5rem;
+      gap: var(--space-2);
       width: calc(100% - 1.4rem);
       flex-wrap: wrap;
     }

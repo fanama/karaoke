@@ -16,30 +16,27 @@
       <span class="label">{$tr('room.pin')}</span>
       <strong class="pin mono">{pin}</strong>
     </p>
-    <p class="tiny dim">{$tr('tv.pinHelp')}</p>
+    <p class="pin-help">{$tr('tv.pinHelp')}</p>
   </div>
 </div>
 
 <style>
   .join-panel {
     display: flex;
-    gap: 0.85rem;
     align-items: center;
-    padding: 0.7rem;
-    border-radius: 16px;
-    border: 1px solid rgb(74 42 114 / 0.75);
-    background: rgb(8 5 15 / 0.7);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 10px 40px rgb(0 0 0 / 0.35);
+    gap: var(--space-3);
+    padding: var(--space-2);
+    background: var(--paper);
+    border-radius: var(--radius-0);
+    color: var(--ink);
   }
 
   .qr-box {
     width: 112px;
     height: 112px;
-    border-radius: 8px;
-    overflow: hidden;
-    background: white;
     flex: none;
+    overflow: hidden;
+    background: #fff;
   }
 
   .qr-box img {
@@ -50,55 +47,56 @@
 
   .join-copy {
     display: grid;
-    gap: 0.15rem;
     align-content: center;
+    gap: var(--space-1);
   }
 
   .join-label {
-    font-size: 0.66rem;
-    font-weight: 800;
-    text-transform: uppercase;
+    color: var(--ink-muted);
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
     letter-spacing: 0.12em;
-    color: var(--cyan);
+    text-transform: uppercase;
   }
 
   .join-code {
-    font-size: 1.05rem;
+    font-size: var(--text-md);
     font-weight: 800;
     letter-spacing: 0.08em;
+    text-transform: uppercase;
   }
 
   .pin-line {
     display: flex;
     align-items: baseline;
-    gap: 0.45rem;
-    margin-top: 0.28rem;
+    gap: var(--space-2);
   }
 
   .pin-line .label {
-    font-size: 0.62rem;
+    color: var(--ink-muted);
+    font-size: var(--text-2xs);
   }
 
   .pin {
-    font-size: 1.15rem;
+    font-size: var(--text-md);
     letter-spacing: 0.14em;
-    color: var(--magenta);
   }
 
-  .join-copy .tiny {
-    max-width: 20ch;
-    line-height: 1.35;
+  .pin-help {
+    max-width: 22ch;
+    color: var(--ink-muted);
+    font-size: var(--text-2xs);
+    line-height: 1.4;
   }
 
   @media (max-width: 900px) {
-    .join-panel {
-      padding: 0.5rem;
-    }
     .qr-box {
       width: 84px;
       height: 84px;
     }
-    .join-copy .tiny {
+
+    .pin-help {
       display: none;
     }
   }
@@ -106,12 +104,14 @@
   @media (max-width: 600px) {
     .join-panel {
       flex-direction: column;
-      gap: 0.4rem;
+      gap: var(--space-1);
     }
+
     .qr-box {
       width: 70px;
       height: 70px;
     }
+
     .join-copy {
       display: none;
     }

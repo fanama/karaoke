@@ -139,46 +139,56 @@
 
 <style>
   .admin-card {
+    display: grid;
+    gap: var(--space-5);
     width: 100%;
     max-width: 560px;
-    display: grid;
-    gap: 1.1rem;
+    padding: var(--space-5);
+    text-align: left;
+    border-top: 2px solid var(--accent);
+  }
+
+  .admin-card h1 {
+    margin-bottom: var(--space-1);
+    font-size: var(--text-xl);
+    font-weight: 800;
+    text-transform: uppercase;
   }
 
   .admin-library {
     display: grid;
-    gap: 0.75rem;
+    gap: var(--space-3);
   }
 
   .storage {
     display: grid;
-    gap: 0.35rem;
+    gap: var(--space-1);
+    padding: var(--space-3);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 0.8rem;
-    background: var(--surface);
+    border-left: 2px solid var(--accent);
+    background: var(--surface-2);
   }
 
   .admin-count {
-    font-size: 1.5rem;
-    font-weight: 800;
     color: var(--text);
+    font-family: var(--mono);
+    font-size: var(--text-xl);
+    font-weight: 800;
   }
 
   .notice {
-    padding: 0.8rem;
-    border-radius: 12px;
-    border: 1px solid rgb(34 211 238 / 0.25);
-    background: rgb(34 211 238 / 0.08);
-    color: #b8f6ff;
-    font-size: 0.85rem;
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    color: var(--muted);
+    font-size: var(--text-xs);
     line-height: 1.5;
   }
 
   .success-text {
-    color: #7ff0b0;
-    font-size: 0.85rem;
-    font-weight: 600;
+    color: var(--accent);
+    font-size: var(--text-xs);
+    font-weight: 700;
   }
 
   .hidden-file {

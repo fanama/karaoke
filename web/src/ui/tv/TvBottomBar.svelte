@@ -75,18 +75,15 @@
 
 <style>
   .tv-bottom {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    position: relative;
     z-index: 15;
     display: grid;
     grid-template-columns: minmax(260px, 1.2fr) auto minmax(220px, 1fr);
-    align-items: end;
-    gap: 1.5rem;
-    padding: 1.4rem 1.7rem 1.5rem;
-    background: linear-gradient(to top, rgb(5 2 10 / 0.96), rgb(5 2 10 / 0.6) 60%, transparent);
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    align-items: center;
+    gap: var(--space-5);
+    padding: var(--space-4) var(--space-5);
+    background: var(--bg);
+    transition: opacity 0.2s ease, transform 0.2s ease;
   }
 
   .tv-bottom.hidden {
@@ -97,8 +94,8 @@
 
   .now-summary {
     display: flex;
-    gap: 0.8rem;
     align-items: center;
+    gap: var(--space-3);
     min-width: 0;
   }
 
@@ -106,10 +103,9 @@
     width: 116px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-radius: 10px;
-    border: 1px solid var(--border);
     flex: none;
-    background: var(--surface-3);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
   }
 
   .now-meta {
@@ -118,35 +114,33 @@
   }
 
   .now-title {
-    font-size: 1.08rem;
+    margin-bottom: 2px;
+    font-size: var(--text-sm);
     font-weight: 800;
     line-height: 1.25;
-    margin-bottom: 0.2rem;
   }
 
   .timeline {
     height: 4px;
-    border-radius: 999px;
-    background: rgb(255 255 255 / 0.14);
+    margin-top: var(--space-2);
+    background: var(--surface-3);
     overflow: hidden;
-    margin-top: 0.4rem;
   }
 
   .timeline span {
     display: block;
     height: 100%;
-    background: linear-gradient(90deg, var(--magenta), var(--cyan));
+    background: var(--accent);
   }
 
   .playback-controls {
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.4rem;
-    border-radius: 999px;
-    background: rgb(18 10 31 / 0.8);
+    gap: var(--space-1);
+    padding: var(--space-1);
+    background: var(--surface);
     border: 1px solid var(--border);
-    backdrop-filter: blur(10px);
+    border-radius: var(--radius-sm);
   }
 
   .ctrl {
@@ -157,43 +151,43 @@
     height: 48px;
     padding: 0;
     border: 0;
-    border-radius: 50%;
+    border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text);
   }
 
   .ctrl:hover {
-    background: rgb(255 255 255 / 0.07);
+    background: var(--surface-2);
   }
 
   .ctrl.primary {
-    width: 58px;
-    height: 58px;
-    background: linear-gradient(135deg, var(--magenta), #ff63b4);
-    color: #1a0010;
-    box-shadow: var(--shadow-neon);
+    width: 54px;
+    height: 54px;
+    background: var(--accent);
+    color: var(--accent-ink);
   }
 
   .queue-badge {
     position: absolute;
-    top: -3px;
+    top: -4px;
     right: -4px;
-    min-width: 18px;
-    height: 18px;
-    padding: 0 4px;
     display: grid;
     place-items: center;
-    border-radius: 999px;
-    background: var(--cyan);
-    color: #001014;
-    font-size: 0.62rem;
-    font-weight: 900;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 var(--space-1);
+    background: var(--accent);
+    color: var(--accent-ink);
+    border-radius: var(--radius-sm);
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
+    font-weight: 800;
   }
 
   @media (max-width: 900px) {
     .tv-bottom {
       grid-template-columns: 1fr auto;
-      gap: 0.8rem;
+      gap: var(--space-3);
     }
   }
 
@@ -201,20 +195,20 @@
     .now-thumb {
       width: 74px;
     }
-    .now-title {
-      font-size: 0.85rem;
-    }
+
     .tv-bottom {
-      padding: 0.7rem;
+      padding: var(--space-2);
     }
+
     .playback-controls {
-      gap: 0;
-      padding: 0.2rem;
+      padding: var(--space-1);
     }
+
     .ctrl {
       width: 40px;
       height: 40px;
     }
+
     .ctrl.primary {
       width: 46px;
       height: 46px;

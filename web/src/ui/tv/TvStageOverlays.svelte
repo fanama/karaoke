@@ -1,6 +1,7 @@
 <script lang="ts">
   import { tr } from '../../application/i18n';
   import type { Snapshot } from '../../domain/models';
+  import Icon from '../common/Icon.svelte';
 
   export let snap: Snapshot;
   export let countdownLeft: number;
@@ -9,9 +10,9 @@
 </script>
 
 {#if !snap.room.tvStarted}
-  <div class="stage-overlay start-overlay">
-    <div class="start-card">
-      <div class="start-icon" aria-hidden="true">🎤</div>
+  <div class="stage-overlay">
+    <div class="overlay-card paper">
+      <span class="overlay-mark" aria-hidden="true"><Icon name="microphone" size={26} /></span>
       <h2>{$tr('tv.start')}</h2>
       <p>{$tr('tv.startBody')}</p>
       <button class="btn btn-primary btn-lg" type="button" on:click={onPlay}>
@@ -20,20 +21,22 @@
     </div>
   </div>
 {:else if !snap.nowPlaying}
-  <div class="stage-overlay idle-overlay">
-    <div class="idle-card">
-      <div class="idle-note">♪</div>
+  <div class="stage-overlay">
+    <div class="overlay-card paper">
+      <span class="overlay-mark" aria-hidden="true"><Icon name="microphone" size={26} /></span>
       <h2>{$tr('tv.idleTitle')}</h2>
       <p>{$tr('tv.idleBody')}</p>
-      <span class="badge badge-cyan">{$tr('tv.addSongs')}</span>
+      <span class="badge">{$tr('tv.addSongs')}</span>
     </div>
   </div>
 {:else if snap.nowPlaying.status === 'countdown'}
-  <div class="stage-overlay countdown-overlay">
-    <div class="countdown-card">
+  <div class="stage-overlay">
+    <div class="overlay-card paper countdown-card">
       <p class="countdown-label">{$tr('tv.countdownNext')}</p>
       <h2 class="clamp-2">{snap.nowPlaying.title}</h2>
-      <p class="countdown-singer">{$tr('tv.nowSinging')}: <strong>{snap.nowPlaying.nickname}</strong></p>
+      <p class="countdown-singer">
+        {$tr('tv.nowSinging')}: <strong>{snap.nowPlaying.nickname}</strong>
+      </p>
       <div class="countdown-number">{Math.max(1, countdownLeft)}</div>
       <button class="btn btn-secondary" type="button" on:click={onCancelCountdown}>
         {$tr('tv.cancel')}
@@ -49,7 +52,7 @@
     z-index: 8;
     display: grid;
     place-items: center;
-    padding: 2rem;
+    padding: var(--space-6);
     pointer-events: none;
   }
 
@@ -57,65 +60,68 @@
     pointer-events: auto;
   }
 
-  .start-card,
-  .idle-card,
-  .countdown-card {
+  .overlay-card {
     display: grid;
     justify-items: center;
-    gap: 0.7rem;
-    text-align: center;
-    padding: 2.2rem;
-    border-radius: 24px;
-    border: 1px solid var(--border-bright);
-    background: rgb(12 7 22 / 0.82);
-    backdrop-filter: blur(14px);
-    box-shadow: 0 24px 100px rgb(0 0 0 / 0.55);
+    gap: var(--space-3);
     max-width: 520px;
+    padding: var(--space-6);
+    text-align: center;
   }
 
-  .start-icon,
-  .idle-note {
-    font-size: 2.4rem;
-    line-height: 1;
-    margin-bottom: 0.2rem;
+  .overlay-mark {
+    display: grid;
+    place-items: center;
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--ink);
+    color: var(--ink);
   }
 
-  .start-card h2,
-  .idle-card h2,
-  .countdown-card h2 {
-    font-size: clamp(1.5rem, 2.6vw, 2.2rem);
+  .overlay-card h2 {
+    font-size: var(--text-xl);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+    text-transform: uppercase;
+    text-wrap: balance;
   }
 
-  .start-card p,
-  .idle-card p {
-    color: var(--muted);
-    line-height: 1.55;
+  .overlay-card p {
     max-width: 38ch;
+    color: var(--ink-muted);
+    font-size: var(--text-sm);
+    line-height: 1.55;
   }
 
-  .start-card .btn {
-    margin-top: 0.6rem;
+  .overlay-card .badge {
+    border-color: var(--ink-muted);
+    color: var(--ink-muted);
+  }
+
+  .overlay-card .btn {
+    margin-top: var(--space-2);
   }
 
   .countdown-label {
-    font-size: 0.7rem;
-    font-weight: 800;
+    color: var(--ink-muted) !important;
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
+    font-weight: 700;
     letter-spacing: 0.2em;
     text-transform: uppercase;
-    color: var(--cyan);
   }
 
   .countdown-singer {
-    color: var(--muted);
-    font-size: 0.9rem;
+    color: var(--ink-muted) !important;
+    font-size: var(--text-xs) !important;
   }
 
   .countdown-number {
+    margin: var(--space-1) 0 var(--space-2);
+    color: var(--ink);
     font-family: var(--mono);
     font-size: clamp(4rem, 9vw, 7rem);
     line-height: 0.9;
-    color: var(--magenta);
-    text-shadow: 0 0 40px rgb(255 45 149 / 0.4);
-    margin: 0.2rem 0 0.6rem;
   }
 </style>

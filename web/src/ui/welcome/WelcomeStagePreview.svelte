@@ -1,173 +1,175 @@
 <script lang="ts">
-  const bars = [14, 30, 22, 44, 60, 36, 72, 48, 26, 54, 34, 18, 40, 64, 28, 20, 38, 50];
+  import { tr } from '../../application/i18n';
+
+  const cells = Array.from({ length: 49 }, (_, i) => (i * 7 + Math.floor(i / 7) * 3) % 5 < 2);
 </script>
 
-<div class="stage-card" aria-hidden="true">
-  <div class="stage-screen">
+<div class="stage-panel" aria-hidden="true" data-testid="stage-preview">
+  <div class="caption">
+    <span>{$tr('welcome.stageCaption')}</span>
+    <span class="caption-code">BLUE-MIC</span>
+  </div>
+
+  <div class="screen">
     <div class="screen-top">
-      <span class="screen-code">BLUE-MIC</span>
-      <span class="screen-live"><i></i>LIVE</span>
+      <span class="code">BLUE-MIC</span>
+      <span class="live">LIVE</span>
     </div>
-    <div class="screen-title">
-      <span class="disc">♪</span>
-      <div>
-        <strong>Bohemian Rhapsody</strong>
-        <small>Karaoke version</small>
+
+    <div class="now">
+      <p class="meta">{$tr('tv.nowSinging')}</p>
+      <p class="title">Bohemian Rhapsody</p>
+      <p class="channel">Karaoke version</p>
+    </div>
+
+    <div class="screen-bottom">
+      <p class="next">
+        <span class="meta">{$tr('room.upNext')}</span>
+        Dancing Queen
+      </p>
+      <div class="qr">
+        {#each cells as on}
+          <i class:on></i>
+        {/each}
       </div>
     </div>
-    <div class="wave">
-      {#each bars as h}
-        <span style={`height:${h}%`}></span>
-      {/each}
-    </div>
-    <div class="screen-bottom">
-      <span class="badge badge-hot">ALEX</span>
-      <span class="screen-next">Next · Dancing Queen</span>
-    </div>
-    <div class="qr-sim">
-      {#each Array(49) as _, i}
-        <i class:on={(i * 7 + Math.floor(i / 7) * 3) % 5 < 2}></i>
-      {/each}
-    </div>
   </div>
-  <div class="stage-glow"></div>
 </div>
 
 <style>
-  .stage-card {
-    position: relative;
-    perspective: 1200px;
+  .stage-panel {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-0);
   }
 
-  .stage-screen {
-    position: relative;
-    aspect-ratio: 16 / 10;
-    padding: 1.3rem;
-    border-radius: 24px;
-    border: 1px solid #542e83;
-    background:
-      radial-gradient(circle at 80% 0%, rgb(255 45 149 / 0.22), transparent 45%),
-      radial-gradient(circle at 0% 100%, rgb(34 211 238 / 0.16), transparent 45%),
-      #0c0716;
-    box-shadow: 0 30px 80px rgb(0 0 0 / 0.55), 0 0 50px rgb(255 45 149 / 0.12);
-    transform: rotateY(-7deg) rotateX(3deg);
+  .caption {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    height: 40px;
+    padding: 0 var(--space-4);
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .caption-code {
+    color: var(--text);
+  }
+
+  .screen {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    overflow: hidden;
+    gap: var(--space-4);
+    aspect-ratio: 16 / 10;
+    max-height: 460px;
+    padding: var(--space-4);
+    background: var(--bg);
   }
 
   .screen-top,
   .screen-bottom {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    gap: 1rem;
+    gap: var(--space-4);
   }
 
-  .screen-code {
+  .code {
+    color: var(--accent);
     font-family: var(--mono);
-    font-size: clamp(1.2rem, 2.4vw, 2rem);
+    font-size: var(--text-lg);
     font-weight: 800;
     letter-spacing: 0.12em;
+    text-transform: uppercase;
   }
 
-  .screen-live {
+  .live {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    color: var(--lime);
-    font-size: 0.65rem;
-    font-weight: 800;
+    gap: var(--space-2);
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
     letter-spacing: 0.16em;
   }
 
-  .screen-live i {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--lime);
-    box-shadow: 0 0 10px var(--lime);
+  .live::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
   }
 
-  .screen-title {
-    display: flex;
-    align-items: center;
-    gap: 0.8rem;
-  }
-
-  .screen-title strong {
-    display: block;
-    font-size: clamp(1.05rem, 2vw, 1.5rem);
-  }
-
-  .screen-title small {
+  .meta {
     color: var(--muted);
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
   }
 
-  .disc {
-    display: grid;
-    place-items: center;
-    width: 48px;
-    height: 48px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, var(--magenta), var(--violet));
-    font-size: 1.4rem;
-    color: #1b0010;
+  .title {
+    margin-top: var(--space-2);
+    font-size: clamp(1.25rem, 3vw, 2.25rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+    text-transform: uppercase;
   }
 
-  .wave {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    height: 76px;
-    opacity: 0.9;
+  .channel {
+    margin-top: var(--space-2);
+    color: var(--muted);
+    font-size: var(--text-xs);
   }
 
-  .wave span {
-    flex: 1;
-    border-radius: 4px;
-    background: linear-gradient(to top, var(--magenta), var(--cyan));
-    min-height: 4px;
+  .next {
+    font-size: var(--text-sm);
+    line-height: 1.3;
   }
 
-  .qr-sim {
-    position: absolute;
-    right: 1.2rem;
-    bottom: 2.7rem;
-    width: 72px;
-    height: 72px;
-    padding: 6px;
+  .next .meta {
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .qr {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
-    background: white;
-    border-radius: 6px;
-    opacity: 0.9;
+    gap: calc(var(--space-1) / 2);
+    width: 72px;
+    height: 72px;
+    padding: calc(var(--space-1) + 2px);
+    background: var(--paper);
+    flex: none;
   }
 
-  .qr-sim i {
+  .qr i {
     background: transparent;
-    border-radius: 1px;
   }
 
-  .qr-sim i.on {
-    background: #08050f;
+  .qr i.on {
+    background: var(--ink);
   }
 
-  .stage-glow {
-    position: absolute;
-    inset: auto 10% -30px;
-    height: 70px;
-    background: var(--magenta);
-    filter: blur(48px);
-    opacity: 0.4;
-    z-index: -1;
-  }
+  @media (min-width: 700px) {
+    .screen {
+      padding: var(--space-5);
+    }
 
-  @media (max-width: 900px) {
-    .stage-card {
-      max-width: 540px;
+    .code {
+      font-size: var(--text-2xl);
+    }
+
+    .qr {
+      width: 88px;
+      height: 88px;
     }
   }
 </style>

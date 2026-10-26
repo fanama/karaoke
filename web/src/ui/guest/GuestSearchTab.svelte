@@ -3,6 +3,7 @@
   import { tr } from '../../application/i18n';
   import { formatDuration } from '../../domain/playback';
   import type { SearchResult } from '../../domain/models';
+  import Icon from '../common/Icon.svelte';
   import GuestVignettes from './GuestVignettes.svelte';
 
   export let q: Writable<string>;
@@ -27,9 +28,7 @@
 <section class="search-panel">
   <div class="search-box">
     <span class="search-icon" aria-hidden="true">
-      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-        <circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>
-      </svg>
+      <Icon name="search" size={20} />
     </span>
     <input
       class="input search-input"
@@ -41,12 +40,17 @@
       enterkeyhint="search"
     />
     {#if $q}
-      <button class="clear-btn" type="button" on:click={onClear} aria-label={$tr('common.close')}>✕</button>
+      <button class="clear-btn" type="button" on:click={onClear} aria-label={$tr('common.close')}>
+        <Icon name="close" size={16} />
+      </button>
     {/if}
   </div>
 
   {#if locked}
-    <div class="notice-strip">🔒 {$tr('room.queueLocked')}</div>
+    <div class="notice-strip">
+      <Icon name="lock" size={16} />
+      {$tr('room.queueLocked')}
+    </div>
   {/if}
   {#if $stale}<div class="notice-strip cyan">{$tr('room.stale')}</div>{/if}
   {#if $searchFailed}
@@ -57,7 +61,7 @@
     <div class="searching"><span class="spinner"></span>{$tr('room.searching')}</div>
   {:else if $searched && $results.length === 0}
     <div class="empty-search">
-      <span>♪</span>
+      <Icon name="microphone" size={28} />
       <p>{$tr('room.noResults')}</p>
     </div>
   {:else if $results.length > 0}
@@ -69,7 +73,12 @@
             <p class="result-title clamp-2">{result.title}</p>
             <p class="tiny dim truncate">{result.channel} · {formatDuration(result.durationSeconds)}</p>
           </div>
-          <button class="btn btn-primary btn-sm" type="button" on:click={() => onChoose(result)} disabled={locked || full}>
+          <button
+            class="btn btn-primary btn-sm"
+            type="button"
+            on:click={() => onChoose(result)}
+            disabled={locked || full}
+          >
             {$tr('room.add')}
           </button>
         </li>
@@ -97,7 +106,9 @@
         autocomplete="off"
         disabled={locked}
       />
-      <button class="btn btn-secondary" type="submit" disabled={locked || full}>{$tr('room.add')}</button>
+      <button class="btn btn-secondary" type="submit" disabled={locked || full}>
+        {$tr('room.add')}
+      </button>
     </div>
     {#if $pasteError}<p class="error-text">{$pasteError}</p>{/if}
   </form>
@@ -106,93 +117,102 @@
 <style>
   .search-box {
     position: relative;
-    margin-bottom: 0.9rem;
+    margin-bottom: var(--space-3);
   }
 
   .search-icon {
     position: absolute;
-    left: 0.9rem;
+    left: var(--space-3);
     top: 50%;
     transform: translateY(-50%);
-    color: var(--dim);
     display: grid;
+    color: var(--dim);
+    pointer-events: none;
   }
 
   .search-input {
-    padding-left: 2.7rem;
-    padding-right: 2.6rem;
-    height: 52px;
-    border-radius: 16px;
-    font-size: 1rem;
+    height: 56px;
+    padding-left: calc(var(--space-6) + var(--space-3));
+    padding-right: calc(var(--space-6) + var(--space-2));
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
   }
 
   .clear-btn {
     position: absolute;
-    right: 0.65rem;
+    right: var(--space-1);
     top: 50%;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
     transform: translateY(-50%);
     border: 0;
-    background: var(--surface-3);
-    color: var(--muted);
-    border-radius: 50%;
-    width: 28px;
-    height: 28px;
+    background: transparent;
+    color: var(--dim);
+  }
+
+  .clear-btn:hover {
+    color: var(--text);
   }
 
   .notice-strip {
-    padding: 0.65rem 0.8rem;
-    margin-bottom: 0.75rem;
-    border-radius: 12px;
-    background: rgb(255 45 149 / 0.1);
-    border: 1px solid rgb(255 45 149 / 0.25);
-    color: #ffc0dd;
-    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    border-radius: var(--radius-0);
+    color: var(--text);
+    font-size: var(--text-xs);
+    line-height: 1.4;
   }
 
   .notice-strip.cyan {
-    background: rgb(34 211 238 / 0.08);
-    border-color: rgb(34 211 238 / 0.25);
-    color: #b8f6ff;
+    border-left-color: var(--accent);
+    color: var(--muted);
   }
 
   .notice-strip.danger {
-    background: rgb(255 92 92 / 0.1);
-    border-color: rgb(255 92 92 / 0.28);
-    color: #ffb3b3;
+    border-left-color: var(--danger);
+    color: var(--danger);
   }
 
   .searching {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: var(--space-2);
+    padding: var(--space-5) var(--space-1);
     color: var(--muted);
-    padding: 1.2rem 0.2rem;
-    font-size: 0.9rem;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   .results {
-    list-style: none;
-    margin: 0 0 1rem;
-    padding: 0;
     display: grid;
-    gap: 0.55rem;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-4);
+    padding: 0;
+    list-style: none;
   }
 
   .result {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
-    padding: 0.55rem;
-    border-radius: 14px;
+    gap: var(--space-3);
+    padding: var(--space-2);
   }
 
   .result img {
     width: 104px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-radius: 9px;
     flex: none;
-    background: var(--surface-3);
+    background: var(--surface-2);
   }
 
   .result-info {
@@ -201,10 +221,11 @@
   }
 
   .result-title {
-    font-size: 0.9rem;
+    margin-bottom: 2px;
+    font-size: var(--text-xs);
     font-weight: 700;
     line-height: 1.3;
-    margin-bottom: 0.2rem;
+    text-wrap: pretty;
   }
 
   .result .btn {
@@ -214,33 +235,32 @@
   .empty-search {
     display: grid;
     justify-items: center;
-    gap: 0.65rem;
-    text-align: center;
-    padding: 2.2rem 1rem;
+    gap: var(--space-3);
+    padding: var(--space-6) var(--space-4);
     color: var(--muted);
+    text-align: center;
   }
 
-  .empty-search span {
-    font-size: 2.2rem;
-    color: var(--magenta);
+  .empty-search :global(svg) {
+    color: var(--accent);
   }
 
   .empty-search p {
     max-width: 34ch;
+    font-size: var(--text-xs);
     line-height: 1.5;
-    font-size: 0.9rem;
   }
 
   .paste-card {
-    margin-top: 1.4rem;
-    padding: 1rem;
     display: grid;
-    gap: 0.55rem;
+    gap: var(--space-2);
+    margin-top: var(--space-5);
+    padding: var(--space-3);
   }
 
   .paste-card .input {
     min-height: 44px;
-    font-size: 0.9rem;
+    font-size: var(--text-xs);
   }
 
   @media (min-width: 680px) {

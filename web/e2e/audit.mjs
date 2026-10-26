@@ -54,7 +54,7 @@ try {
   );
   check('guest phone has no horizontal overflow', guestOverflow <= 0, `${guestOverflow}px`);
   const french = await guest.locator('.tabs button').first().innerText();
-  check('French is selected from browser locale', /Rechercher/.test(french), french.trim());
+  check('French is selected from browser locale', /rechercher/i.test(french), french.trim());
 
   const search = guest.locator('.search-input');
   await search.fill('bohemian rhapsody');
@@ -76,7 +76,7 @@ try {
 
   await guest.locator('.lang-toggle button').first().click();
   const english = await guest.locator('.tabs button').first().innerText();
-  check('language toggle switches to English', /Search/.test(english), english.trim());
+  check('language toggle switches to English', /search/i.test(english), english.trim());
 
   await welcome.waitForTimeout(300);
   check('no page errors', errors.length === 0, errors.slice(0, 3).join(' | '));

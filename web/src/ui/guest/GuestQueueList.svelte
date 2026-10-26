@@ -2,6 +2,7 @@
   import { tr } from '../../application/i18n';
   import type { QueueItem } from '../../domain/models';
   import { formatDuration } from '../../domain/playback';
+  import Icon from '../common/Icon.svelte';
 
   export let queue: QueueItem[];
   export let isHost: boolean;
@@ -12,21 +13,21 @@
 
 <div class="queue-heading">
   <h2>{$tr('room.upNext')}</h2>
-  <span class="tiny dim">{$tr('room.queueCount', { count: queue.length })}</span>
+  <span class="mono-meta">{$tr('room.queueCount', { count: queue.length })}</span>
 </div>
 
 {#if queue.length === 0}
-  <p class="tiny dim empty-line">{$tr('room.emptyBody')}</p>
+  <p class="empty-line">{$tr('room.emptyBody')}</p>
 {/if}
 
 <ol class="queue-list">
   {#each queue as item, index (item.id)}
-    <li class="queue-item card" class:mine={item.mine}>
-      <span class="position mono">{index + 1}</span>
+    <li class="queue-item" class:mine={item.mine}>
+      <span class="position">{String(index + 1).padStart(2, '0')}</span>
       <img src={item.thumbnailUrl} alt="" loading="lazy" width="96" height="54" />
       <div class="queue-info">
         <p class="queue-title clamp-2">{item.title}</p>
-        <p class="tiny dim truncate">
+        <p class="queue-meta truncate">
           {item.nickname}{#if item.mine} · <span class="you">{$tr('room.youAre')}</span>{/if}
           · {formatDuration(item.durationSeconds)}
         </p>
@@ -40,16 +41,37 @@
           aria-label={$tr(item.votedByMe ? 'room.voted' : 'room.vote')}
           title={$tr(item.votedByMe ? 'room.voted' : 'room.vote')}
         >
-          <svg viewBox="0 0 24 24" width="15" height="15" fill={item.votedByMe ? 'currentColor' : 'none'} stroke="currentColor" stroke-width="2">
-            <path d="M12 19V5M5 12l7-7 7 7"/>
-          </svg>
+          <Icon name="up" size={14} />
           <span>{item.score}</span>
         </button>
         {#if isHost}
           <div class="host-item-actions">
-            <button type="button" class="mini-action" on:click={() => onMove(index, -1)} disabled={index === 0} aria-label={$tr('room.moveUp')}>↑</button>
-            <button type="button" class="mini-action" on:click={() => onMove(index, 1)} disabled={index === queue.length - 1} aria-label={$tr('room.moveDown')}>↓</button>
-            <button type="button" class="mini-action danger" on:click={() => onRemove(item.id)} aria-label={$tr('room.remove')}>✕</button>
+            <button
+              type="button"
+              class="mini-action"
+              on:click={() => onMove(index, -1)}
+              disabled={index === 0}
+              aria-label={$tr('room.moveUp')}
+            >
+              <Icon name="up" size={14} />
+            </button>
+            <button
+              type="button"
+              class="mini-action"
+              on:click={() => onMove(index, 1)}
+              disabled={index === queue.length - 1}
+              aria-label={$tr('room.moveDown')}
+            >
+              <Icon name="down" size={14} />
+            </button>
+            <button
+              type="button"
+              class="mini-action danger"
+              on:click={() => onRemove(item.id)}
+              aria-label={$tr('room.remove')}
+            >
+              <Icon name="close" size={14} />
+            </button>
           </div>
         {/if}
       </div>
@@ -62,53 +84,60 @@
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    gap: 1rem;
-    margin-top: 0.4rem;
+    gap: var(--space-4);
+    margin-top: var(--space-1);
+    padding-top: var(--space-3);
+    border-top: 2px solid var(--accent);
   }
 
   .queue-heading h2 {
-    font-size: 1.05rem;
+    font-size: var(--text-md);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    text-transform: uppercase;
   }
 
   .empty-line {
-    padding: 0.4rem 0;
+    padding: var(--space-2) 0;
+    color: var(--dim);
+    font-size: var(--text-xs);
   }
 
   .queue-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
     display: grid;
-    gap: 0.55rem;
+    gap: 0;
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    list-style: none;
   }
 
   .queue-item {
     display: flex;
     align-items: center;
-    gap: 0.55rem;
-    padding: 0.55rem;
-    border-radius: 14px;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--border);
   }
 
   .queue-item.mine {
-    border-color: rgb(255 45 149 / 0.35);
+    border-left: 2px solid var(--accent);
+    padding-left: var(--space-2);
   }
 
   .position {
-    width: 18px;
+    width: 20px;
     flex: none;
     color: var(--dim);
-    font-size: 0.72rem;
-    text-align: center;
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
   }
 
   .queue-item img {
     width: 82px;
     aspect-ratio: 16 / 9;
     object-fit: cover;
-    border-radius: 8px;
     flex: none;
-    background: var(--surface-3);
+    background: var(--surface-2);
   }
 
   .queue-info {
@@ -117,14 +146,19 @@
   }
 
   .queue-title {
-    font-size: 0.88rem;
+    margin-bottom: 2px;
+    font-size: var(--text-xs);
     font-weight: 700;
     line-height: 1.3;
-    margin-bottom: 0.2rem;
+  }
+
+  .queue-meta {
+    color: var(--dim);
+    font-size: var(--text-2xs);
   }
 
   .you {
-    color: var(--magenta);
+    color: var(--accent);
     font-weight: 700;
   }
 
@@ -132,45 +166,47 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 0.3rem;
+    gap: var(--space-1);
     flex: none;
   }
 
   .vote-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.25rem;
-    min-width: 46px;
-    min-height: 34px;
-    padding: 0 0.5rem;
-    border-radius: 999px;
+    gap: var(--space-1);
+    min-width: 56px;
+    min-height: 44px;
+    padding: 0 var(--space-2);
     border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
     background: transparent;
     color: var(--muted);
-    font-size: 0.78rem;
+    font-family: var(--mono);
+    font-size: var(--text-2xs);
     font-weight: 800;
   }
 
   .vote-btn.active {
-    border-color: var(--magenta);
-    background: rgb(255 45 149 / 0.14);
-    color: #ffb3d7;
+    border-color: var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
   }
 
   .host-item-actions {
     display: flex;
-    gap: 2px;
+    gap: var(--space-1);
   }
 
   .mini-action {
-    width: 26px;
-    height: 26px;
-    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 32px;
+    padding: 0;
     border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
     background: transparent;
     color: var(--muted);
-    font-size: 0.75rem;
-    padding: 0;
   }
 
   .mini-action.danger {
